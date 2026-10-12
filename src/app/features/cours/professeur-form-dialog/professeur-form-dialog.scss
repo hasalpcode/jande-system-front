@@ -1,0 +1,23 @@
+.contenu {
+  min-width: 640px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px 14px;
+}
+
+.erreur {
+  color: var(--mat-sys-error);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 760px) {
+  .contenu {
+    min-width: 0;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,302 @@
+<div class="page-header">
+  <div>
+    <h1>Cours</h1>
+    <p>Professeurs, affectations, séances et présences.</p>
+  </div>
+</div>
+
+<mat-tab-group animationDuration="120ms">
+  <mat-tab label="Professeurs">
+    <div class="tab-content surface-card">
+      <div class="card-head">
+        <h3>Professeurs</h3>
+        @if (authService.hasPermission('COURS_AFFECTATIONS')) {
+          <button mat-flat-button color="primary" (click)="ouvrirAjoutProfesseur()"><mat-icon>add</mat-icon> Ajouter</button>
+        }
+      </div>
+      <div class="table-scroll">
+        <table class="styled-table">
+          <thead><tr><th>Code prof</th><th>Nom</th><th>Titre</th><th>Spécialité</th><th>Téléphone</th><th>Email</th><th>Type</th></tr></thead>
+          <tbody>
+            @for (p of professeurs(); track p.id) {
+              <tr>
+                <td class="muted">{{ p.codeProf }}</td>
+                <td>{{ p.prenom }} {{ p.nom }}</td>
+                <td class="muted">{{ p.titre || '—' }}</td>
+                <td class="muted">{{ p.specialite || '—' }}</td>
+                <td class="muted">{{ p.telephone || '—' }}</td>
+                <td class="muted">{{ p.email || '—' }}</td>
+                <td><span class="status-chip chip-neutral">{{ p.type }}</span></td>
+              </tr>
+            } @empty { <tr><td colspan="7" class="muted">Aucun professeur.</td></tr> }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Affectations">
+    <div class="tab-content surface-card">
+      @if (registreSelectionne(); as affectationRegistre) {
+        <!-- Étape 4 : registre de cours - les séances d'UNE affectation, avec leur contenu
+             enseigné. Le marquage des présences se fait depuis l'onglet "Séances & présences". -->
+        <div class="card-head">
+          <div class="fil-ariane">
+            <button mat-button (click)="retourAffectations()"><mat-icon>chevron_left</mat-icon> Affectations</button>
+            <h3>Registre de cours — {{ affectationRegistre.elementConstitutif?.intitule || '—' }}</h3>
+          </div>
+          @if (authService.hasPermission('COURS_SEANCES')) {
+            <button mat-flat-button color="primary" (click)="ouvrirAjoutSeance(affectationRegistre)"><mat-icon>add</mat-icon> Ajouter</button>
+          }
+        </div>
+        <p class="muted" style="padding: 0 18px 12px;">
+          {{ affectationRegistre.professeur ? (affectationRegistre.professeur.prenom + ' ' + affectationRegistre.professeur.nom) : '—' }}
+          · Volume horaire : {{ heuresConsommees(affectationRegistre) | number: '1.0-1' }}h / {{ affectationRegistre.volumeHorairePrevu }}h
+          @if (heuresRestantes(affectationRegistre) === 0) {
+            <span class="status-chip chip-success">Complet</span>
+          } @else {
+            ({{ heuresRestantes(affectationRegistre) | number: '1.0-1' }}h restantes)
+          }
+        </p>
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead>
+              <tr><th>Date</th><th>Heure début</th><th>Heure fin</th><th>Salle</th><th>Type</th><th>Contenu / chapitre enseigné</th><th>action</th></tr>
+            </thead>
+            <tbody>
+              @for (s of seancesDeLAffectation(); track s.id) {
+                <tr>
+                  <td class="muted">{{ s.date }}</td>
+                  <td class="muted">{{ s.heureDebut }}</td>
+                  <td class="muted">{{ s.heureFin }}</td>
+                  <td class="muted">{{ s.salle?.libelle || '—' }}</td>
+                  <td class="muted">{{ s.type || '—' }}</td>
+                  <td>{{ s.contenu ? contenuTronque(s.contenu) : '—' }}</td>
+                  <td>
+                    <button mat-icon-button (click)="ouvrirDetailSeance(s)" matTooltip="Voir les détails">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                    @if (authService.hasPermission('COURS_REGISTRE')) {
+                      <button mat-icon-button (click)="ouvrirEditionSeance(s)" matTooltip="Modifier">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button (click)="supprimerSeance(s)" matTooltip="Supprimer">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              } @empty { <tr><td colspan="7" class="muted">Aucune séance pour cette affectation.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+      } @else if (groupeSelectionne(); as groupe) {
+        <!-- Étape 3 : affectation des modules d'UN groupe - seule cette étape est affichée,
+             les étapes précédentes (année, liste des groupes) sont repliées en un fil d'Ariane. -->
+        <div class="card-head">
+          <div class="fil-ariane">
+            <button mat-button (click)="retourGroupes()"><mat-icon>chevron_left</mat-icon> Groupes</button>
+            <h3>Affectation des modules — {{ groupe.libelle }}</h3>
+          </div>
+          @if (authService.hasPermission('COURS_AFFECTATIONS')) {
+            <button mat-flat-button color="primary" (click)="ouvrirAjoutAffectation()"><mat-icon>add</mat-icon> Ajouter</button>
+          }
+        </div>
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead>
+              <tr><th>Code element</th><th>Element constitutif</th><th>Vol h</th><th>Crédit</th><th>Code prof</th><th>Professeur</th><th>action</th></tr>
+            </thead>
+            <tbody>
+              @for (a of affectationsDuGroupe(); track a.id) {
+                <tr>
+                  <td class="muted">{{ a.elementConstitutif?.code || '—' }}</td>
+                  <td>{{ a.elementConstitutif?.intitule || '—' }}</td>
+                  <td class="numeric">
+                    {{ heuresConsommees(a) | number: '1.0-1' }}h / {{ a.volumeHorairePrevu }}h
+                    @if (heuresRestantes(a) === 0) { <span class="status-chip chip-success">Complet</span> }
+                  </td>
+                  <td class="numeric muted">{{ a.elementConstitutif?.credits ?? '—' }}</td>
+                  <td class="muted">{{ a.professeur?.codeProf || '—' }}</td>
+                  <td>{{ a.professeur ? (a.professeur.prenom + ' ' + a.professeur.nom) : '—' }}</td>
+                  <td>
+                    <button mat-icon-button (click)="ouvrirRegistre(a)" matTooltip="Registre de cours">
+                      <mat-icon>menu_book</mat-icon>
+                    </button>
+                    @if (authService.hasPermission('COURS_AFFECTATIONS')) {
+                      <button mat-icon-button (click)="ouvrirEditionAffectation(a)" matTooltip="Modifier">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button (click)="supprimerAffectation(a)" matTooltip="Retirer l'affectation">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              } @empty { <tr><td colspan="7" class="muted">Aucun module affecté à ce groupe.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+      } @else if (anneeAffichee()) {
+        <!-- Étape 2 : liste des groupes de l'année choisie. -->
+        <div class="card-head">
+          <div class="fil-ariane">
+            <button mat-button (click)="anneeAffichee.set(null)"><mat-icon>chevron_left</mat-icon> Année</button>
+            <h3>Groupes</h3>
+            @if (anneeAfficheeSelectionnee(); as a) {
+              <span class="muted small-text">({{ a.dateDebut }} → {{ a.dateFin }})</span>
+            }
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead><tr><th>N°groupe/classe</th><th>Nom Groupe</th><th>Niveau</th><th>Affectations</th></tr></thead>
+            <tbody>
+              @for (g of groupesAffiches(); track g.id) {
+                <tr>
+                  <td class="muted">{{ g.id.slice(0, 8).toUpperCase() }}</td>
+                  <td>{{ g.libelle }}</td>
+                  <td class="muted">{{ g.niveauLibelle || '—' }}</td>
+                  <td>
+                    <button mat-icon-button (click)="selectionnerGroupe(g)" matTooltip="Voir les affectations">
+                      <mat-icon>open_in_new</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              } @empty { <tr><td colspan="4" class="muted">Aucun groupe pour cette année.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <!-- Étape 1 : choix de l'année académique. -->
+        <div class="card-head"><h3>Affectations</h3></div>
+        <form [formGroup]="formAnnee" (ngSubmit)="voirGroupes()" class="inline-form">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Année académique</mat-label>
+            <mat-select formControlName="anneeAcademiqueId">
+              @for (a of annees(); track a.id) { <mat-option [value]="a.id">{{ a.libelle }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+          <button mat-flat-button color="primary" type="submit">Voir groupes</button>
+        </form>
+      }
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Séances & présences">
+    <div class="tab-content surface-card">
+      <div class="card-head">
+        <h3>Séances</h3>
+        @if (authService.hasPermission('COURS_SEANCES')) {
+          <button mat-flat-button color="primary" (click)="ouvrirAjoutSeance()"><mat-icon>add</mat-icon> Ajouter</button>
+        }
+      </div>
+
+      <div class="seance-list">
+        @for (s of seances(); track s.id) {
+          <div class="seance-row">
+            <div class="seance-header">
+              <button class="seance-summary" (click)="basculerSeance(s)">
+                <mat-icon class="chevron" [class.open]="seanceOuverte() === s.id">chevron_right</mat-icon>
+                @if (s.type) { <span class="status-chip chip-neutral">{{ s.type }}</span> }
+                <span>{{ s.date }} · {{ s.heureDebut }}–{{ s.heureFin }}</span>
+                @if (s.affectation?.classe?.libelle) { <span class="muted">{{ s.affectation?.classe?.libelle }}</span> }
+                @if (s.contenu) { <span class="muted seance-apercu">{{ contenuTronque(s.contenu) }}</span> }
+              </button>
+              <button mat-icon-button (click)="ouvrirDetailSeance(s)" matTooltip="Voir les détails"><mat-icon>visibility</mat-icon></button>
+              @if (authService.hasPermission('COURS_REGISTRE')) {
+                <button mat-icon-button (click)="ouvrirEditionSeance(s)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
+                <button mat-icon-button (click)="supprimerSeance(s)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
+              }
+            </div>
+            @if (seanceOuverte() === s.id) {
+              <div class="seance-detail">
+                @if (!s.affectation?.classe) {
+                  <p class="data-table-empty">Cette séance n'est rattachée à aucune classe.</p>
+                } @else {
+                  <div class="table-scroll">
+                    <table class="styled-table">
+                      <thead>
+                        <tr><th>Étudiant</th><th>Matricule</th><th>Présence</th><th class="numeric">Retard (min)</th><th>Justification</th></tr>
+                      </thead>
+                      <tbody>
+                        @for (e of rosterDeSeance(s); track e.id) {
+                          <tr>
+                            <td>{{ e.prenom }} {{ e.nom }}</td>
+                            <td class="muted">{{ e.matricule }}</td>
+                            <td>
+                              <button
+                                type="button"
+                                class="status-chip statut-btn"
+                                [class.chip-success]="statutDe(s.id, e.id) === 'PRESENT'"
+                                [disabled]="!authService.hasPermission('COURS_PRESENCES')"
+                                (click)="marquerPresence(s.id, e.id, 'PRESENT')"
+                              >Présent</button>
+                              <button
+                                type="button"
+                                class="status-chip statut-btn"
+                                [class.chip-error]="statutDe(s.id, e.id) === 'ABSENT'"
+                                [disabled]="!authService.hasPermission('COURS_PRESENCES')"
+                                (click)="marquerPresence(s.id, e.id, 'ABSENT')"
+                              >Absent</button>
+                              <button
+                                type="button"
+                                class="status-chip statut-btn"
+                                [class.chip-warning]="statutDe(s.id, e.id) === 'RETARD'"
+                                [disabled]="!authService.hasPermission('COURS_PRESENCES')"
+                                (click)="marquerPresence(s.id, e.id, 'RETARD', retardInput.valueAsNumber || 0)"
+                              >Retard</button>
+                            </td>
+                            <td class="numeric">
+                              <input #retardInput type="number" min="0" class="retard-input" [value]="retardMinDe(s.id, e.id) || ''" />
+                            </td>
+                            <td>
+                              @if (statutDe(s.id, e.id) === 'ABSENT' || statutDe(s.id, e.id) === 'RETARD') {
+                                <div class="justification">
+                                  <label class="justifie-toggle">
+                                    <input
+                                      type="checkbox"
+                                      [checked]="justifieDe(s.id, e.id)"
+                                      (change)="basculerJustification(s.id, e.id, $any($event.target).checked)"
+                                    />
+                                    Justifié
+                                  </label>
+                                  <input
+                                    #pieceInput
+                                    type="file"
+                                    accept="image/*,application/pdf"
+                                    hidden
+                                    (change)="selectionnerPieceJustificative(s.id, e.id, $event)"
+                                  />
+                                  <button mat-icon-button type="button" (click)="pieceInput.click()" matTooltip="Ajouter une pièce justificative">
+                                    <mat-icon>attach_file</mat-icon>
+                                  </button>
+                                  @if (pieceDe(s.id, e.id)) {
+                                    <button mat-icon-button type="button" (click)="voirPieceJustificative(s.id, e.id)" matTooltip="Voir la pièce">
+                                      <mat-icon>description</mat-icon>
+                                    </button>
+                                    <button mat-icon-button type="button" (click)="retirerPieceJustificative(s.id, e.id)" matTooltip="Retirer la pièce">
+                                      <mat-icon>close</mat-icon>
+                                    </button>
+                                  }
+                                </div>
+                              } @else {
+                                <span class="muted">—</span>
+                              }
+                            </td>
+                          </tr>
+                        } @empty { <tr><td colspan="5" class="muted">Aucun étudiant dans cette classe.</td></tr> }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        } @empty {
+          <p class="data-table-empty">Aucune séance programmée.</p>
+        }
+      </div>
+    </div>
+  </mat-tab>
+</mat-tab-group>

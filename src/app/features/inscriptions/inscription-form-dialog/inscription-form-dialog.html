@@ -1,0 +1,129 @@
+<h2 mat-dialog-title>{{ enEdition ? "Modifier l'inscription" : 'Nouvelle inscription' }}</h2>
+
+<mat-dialog-content class="contenu">
+  <form [formGroup]="formInscription" id="formInscription" (ngSubmit)="soumettre()">
+    <div class="section-banner">Inscription</div>
+    <div class="form-grid">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Étudiant</mat-label>
+        <mat-select formControlName="etudiantId">
+          @for (e of data.etudiants; track e.id) { <mat-option [value]="e.id">{{ e.prenom }} {{ e.nom }} ({{ e.matricule }})</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Classe</mat-label>
+        <mat-select formControlName="classeId">
+          @for (c of classesProposees(); track c.id) { <mat-option [value]="c.id">{{ c.libelle }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      @if (classeChoisie(); as classe) {
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Année académique</mat-label>
+          <input matInput [value]="classe.anneeAcademiqueLibelle" disabled />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Niveau</mat-label>
+          <input matInput [value]="classe.niveauLibelle || '—'" disabled />
+        </mat-form-field>
+      }
+      @if (enEdition) {
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Statut</mat-label>
+          <mat-select formControlName="statut">
+            @for (s of statutsInscription; track s) { <mat-option [value]="s">{{ s }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+      }
+    </div>
+  </form>
+
+  @if (chargementEcheances()) {
+    <div class="spinner-row"><mat-spinner diameter="28" /></div>
+  } @else if (niveauDeLaClasse()) {
+    <div class="section-banner">Engagements</div>
+    <p class="muted" style="margin: 0 0 8px;">
+      Montants propres à cette inscription : modifiables librement, sans impact sur les paramètres d'engagements du niveau.
+    </p>
+    <form [formGroup]="formEngagements">
+      <div class="form-grid-3">
+        @for (t of typesEngagementPivot; track t.type) {
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>{{ t.label }}</mat-label>
+            <input matInput type="number" [formControlName]="t.type" />
+          </mat-form-field>
+        }
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Montant total</mat-label>
+          <input matInput [value]="montantTotalEngagements() | number: '1.0-0'" disabled />
+        </mat-form-field>
+      </div>
+    </form>
+
+    <div class="section-banner">Calendrier prévisionnel des paiements</div>
+    <form [formGroup]="formCalendrier">
+      <div class="inline-form" style="padding: 0 0 8px;">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="small">
+          <mat-label>Nombre de mensualités</mat-label>
+          <input matInput type="number" min="1" formControlName="nombreMensualites" />
+        </mat-form-field>
+        <button mat-button type="button" (click)="genererCalendrier()">Régénérer</button>
+      </div>
+      <div class="table-scroll" formArrayName="lignes">
+        <table class="styled-table">
+          <thead><tr><th>Année</th><th>Mois</th><th>Libellé opération</th><th>Montant prévu</th><th></th></tr></thead>
+          <tbody>
+            @for (ligne of lignesCalendrier.controls; track $index; let i = $index) {
+              <tr [formGroupName]="i">
+                <td>
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-select formControlName="anneeAcademiqueId">
+                      @for (a of data.annees; track a.id) { <mat-option [value]="a.id">{{ a.libelle }}</mat-option> }
+                    </mat-select>
+                  </mat-form-field>
+                </td>
+                <td>
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-select formControlName="mois">
+                      @for (m of mois; track m; let mi = $index) { <mat-option [value]="mi">{{ m }}</mat-option> }
+                    </mat-select>
+                  </mat-form-field>
+                </td>
+                <td>
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-select formControlName="type">
+                      @for (t of typesEngagementPivot; track t.type) { <mat-option [value]="t.type">{{ t.label }}</mat-option> }
+                    </mat-select>
+                  </mat-form-field>
+                </td>
+                <td>
+                  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <input matInput type="number" formControlName="montantPrevu" />
+                  </mat-form-field>
+                </td>
+                <td>
+                  <button mat-icon-button type="button" (click)="retirerLigneCalendrier(i)" matTooltip="Retirer la ligne">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="5" class="muted">Aucune échéance planifiée.</td></tr> }
+          </tbody>
+        </table>
+      </div>
+      <button mat-button type="button" (click)="ajouterLigneCalendrier()">
+        <mat-icon>add</mat-icon> Ajouter une ligne
+      </button>
+    </form>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="annuler()">Annuler</button>
+  <button mat-flat-button color="primary" type="submit" form="formInscription" [disabled]="enCours()">
+    @if (enCours()) {
+      <mat-spinner diameter="20" />
+    } @else {
+      {{ enEdition ? 'Enregistrer' : 'Inscrire' }}
+    }
+  </button>
+</mat-dialog-actions>

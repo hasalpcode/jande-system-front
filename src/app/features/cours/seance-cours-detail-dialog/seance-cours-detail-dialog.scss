@@ -1,0 +1,20 @@
+.contenu {
+  min-width: 480px;
+  max-width: 640px;
+}
+
+.muted {
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0 0 12px;
+}
+
+.texte {
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+  .contenu {
+    min-width: 0;
+  }
+}

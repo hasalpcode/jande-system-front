@@ -1,0 +1,51 @@
+.contenu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 640px;
+  max-height: 70vh;
+}
+
+.ligne {
+  display: flex;
+  gap: 12px;
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+.niveau-cible {
+  font-weight: 600;
+}
+
+.section-banner {
+  margin: 8px 0 12px;
+  padding: 6px 14px;
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-align: center;
+  border-radius: 6px;
+}
+
+.montants-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px 14px;
+}
+
+.erreur {
+  color: var(--mat-sys-error);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 760px) {
+  .contenu {
+    min-width: 0;
+  }
+  .montants-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

@@ -1,0 +1,55 @@
+.tab-content {
+  padding-top: 20px;
+}
+
+.card-head-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+
+  .chevron {
+    color: var(--mat-sys-on-surface-variant);
+    transition: transform 0.15s ease;
+    &.open {
+      transform: rotate(90deg);
+    }
+  }
+}
+
+.grille-budget {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 4px 20px 20px;
+}
+
+.stat-budget {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: var(--mat-sys-surface-container-low);
+
+  .etiquette {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  strong {
+    font-size: 1.3rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &.negatif strong {
+    color: var(--mat-sys-error);
+  }
+}

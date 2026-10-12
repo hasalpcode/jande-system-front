@@ -1,0 +1,51 @@
+<div class="page-header">
+  <div>
+    <h1>Établissements</h1>
+    <p>Universités, écoles, publics, privés — chacun avec son schéma dédié.</p>
+  </div>
+  <div class="page-header-actions">
+    <button mat-flat-button color="primary" (click)="ouvrirCreation()">
+      <mat-icon>add</mat-icon>
+      Nouvel établissement
+    </button>
+  </div>
+</div>
+
+<div class="surface-card">
+  @if (chargement()) {
+    <div class="loading-block"><span class="spinner"></span> Chargement…</div>
+  } @else if (etablissements().length === 0) {
+    <p class="data-table-empty">Aucun établissement pour l'instant.</p>
+  } @else {
+    <div class="table-scroll">
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Code</th>
+            <th>Type</th>
+            <th>Adresse</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (e of etablissements(); track e.id) {
+            <tr>
+              <td>{{ e.nom }}</td>
+              <td><code>{{ e.code }}</code></td>
+              <td><span class="status-chip chip-neutral">{{ e.type }}</span></td>
+              <td class="muted">{{ e.adresse || '—' }}</td>
+              <td>
+                <mat-slide-toggle
+                  [checked]="e.actif"
+                  matTooltip="Activer / désactiver l'accès de cet établissement"
+                  (change)="basculerStatut(e)"
+                />
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

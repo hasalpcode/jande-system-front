@@ -1,0 +1,133 @@
+<div class="page-header">
+  <div>
+    <h1>Badgeage</h1>
+    <p>Scan de la carte étudiant à l'entrée — identité, situation de paiement, présence/retard sur le cours en cours, et rappel des absences/retards non justifiés.</p>
+  </div>
+</div>
+
+<div class="surface-card">
+  <div class="card-head"><h3><mat-icon class="titre-icone tint-badgeage">credit_card</mat-icon> Poste de badgeage</h3></div>
+  <form [formGroup]="formBadgeage" (ngSubmit)="soumettre()" class="inline-form">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grow">
+      <mat-label>Numéro de carte</mat-label>
+      <input #champNumeroCarte matInput formControlName="numeroCarte" placeholder="Scanner ou saisir le numéro" autocomplete="off" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Poste</mat-label>
+      <input matInput formControlName="poste" placeholder="Entrée principale" />
+    </mat-form-field>
+    <button mat-flat-button color="primary" type="submit" [disabled]="enCours()">
+      @if (enCours()) {
+        <mat-spinner diameter="20" />
+      } @else {
+        Badger
+      }
+    </button>
+  </form>
+
+  @if (erreur()) {
+    <p class="dialog-error" style="padding: 0 18px 12px;">{{ erreur() }}</p>
+  }
+
+  @if (dernierBadge(); as b) {
+    <div class="resultat-badge" [class.alerte]="!b.aJourPaiement || !b.assiduiteAJour">
+      <div class="resultat-identite">
+        <span class="avatar-initiale">{{ b.nomComplet.charAt(0) }}</span>
+        <div>
+          <div class="resultat-nom">{{ b.nomComplet }}</div>
+          <div class="muted">
+            <code>{{ b.matricule }}</code> · {{ b.classeLibelle }} · {{ b.anneeAcademiqueLibelle }}
+          </div>
+        </div>
+        <span class="resultat-heure muted">{{ b.dateHeureBadge | date: 'short' }}</span>
+      </div>
+
+      <div class="resultat-puces">
+        <span class="status-chip" [class.chip-success]="b.aJourPaiement" [class.chip-error]="!b.aJourPaiement">
+          {{ b.aJourPaiement ? 'Paiement à jour' : 'Paiement en retard' }}
+        </span>
+        @if (!b.aJourPaiement) {
+          <span class="status-chip chip-neutral">Reste à payer : {{ b.montantRestant | number: '1.0-0' }}</span>
+        }
+
+        @if (b.statutPresence; as statut) {
+          <span
+            class="status-chip"
+            [class.chip-success]="statut === 'PRESENT'"
+            [class.chip-warning]="statut === 'RETARD'"
+          >
+            {{ statut === 'RETARD' ? 'Retard — ' + b.dureeRetardMin + ' min' : 'Présent' }}
+          </span>
+          <span class="muted small-text">{{ b.seanceLibelle }}</span>
+        } @else {
+          <span class="status-chip chip-neutral">Aucune séance en cours pour sa classe</span>
+        }
+
+        <span class="status-chip" [class.chip-success]="b.assiduiteAJour" [class.chip-error]="!b.assiduiteAJour">
+          {{ b.assiduiteAJour ? 'Assiduité à jour' : b.absencesNonJustifiees.length + ' absence(s)/retard(s) non justifié(s)' }}
+        </span>
+      </div>
+
+      @if (!b.assiduiteAJour) {
+        <div class="table-scroll" style="margin-top: 10px;">
+          <table class="styled-table">
+            <thead><tr><th>Date</th><th>Statut</th><th>Élément constitutif</th></tr></thead>
+            <tbody>
+              @for (a of b.absencesNonJustifiees; track a.date + a.seanceLibelle) {
+                <tr>
+                  <td class="muted">{{ a.date | date: 'dd/MM/yyyy' }}</td>
+                  <td>
+                    <span class="status-chip petit chip-error">{{ a.statut === 'RETARD' ? 'Retard' : 'Absence' }}</span>
+                  </td>
+                  <td class="muted">{{ a.seanceLibelle }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (historique().length) {
+  <div class="surface-card" style="margin-top: 16px;">
+    <div class="card-head"><h3>Derniers passages (session en cours)</h3></div>
+    <div class="table-scroll">
+      <table class="styled-table">
+        <thead>
+          <tr><th>Heure</th><th>Étudiant</th><th>Matricule</th><th>Classe</th><th>Paiement</th><th>Présence</th><th>Assiduité</th></tr>
+        </thead>
+        <tbody>
+          @for (b of historique(); track b.dateHeureBadge + b.etudiantId) {
+            <tr>
+              <td class="muted">{{ b.dateHeureBadge | date: 'shortTime' }}</td>
+              <td>{{ b.nomComplet }}</td>
+              <td class="muted"><code>{{ b.matricule }}</code></td>
+              <td class="muted">{{ b.classeLibelle }}</td>
+              <td>
+                <span class="status-chip petit" [class.chip-success]="b.aJourPaiement" [class.chip-error]="!b.aJourPaiement">
+                  {{ b.aJourPaiement ? 'À jour' : 'En retard' }}
+                </span>
+              </td>
+              <td>
+                @if (b.statutPresence; as statut) {
+                  <span class="status-chip petit" [class.chip-success]="statut === 'PRESENT'" [class.chip-warning]="statut === 'RETARD'">
+                    {{ statut === 'RETARD' ? 'Retard' : 'Présent' }}
+                  </span>
+                } @else {
+                  <span class="muted">—</span>
+                }
+              </td>
+              <td>
+                <span class="status-chip petit" [class.chip-success]="b.assiduiteAJour" [class.chip-error]="!b.assiduiteAJour">
+                  {{ b.assiduiteAJour ? 'À jour' : b.absencesNonJustifiees.length + ' non justifié(s)' }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

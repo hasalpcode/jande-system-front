@@ -1,0 +1,444 @@
+<div class="page-header">
+  <div>
+    <h1>Paramétrage</h1>
+    <p>Le socle de configuration — à construire avant Parcours et Inscriptions.</p>
+  </div>
+</div>
+
+<mat-tab-group animationDuration="120ms">
+  <mat-tab label="Académique">
+    <div class="card-grid tab-content">
+
+      <div class="surface-card carte-etablissement">
+        <div class="card-head">
+          <h3>Établissement</h3>
+          <button mat-icon-button (click)="ouvrirEtablissement()" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
+        </div>
+        @if (etablissement(); as e) {
+          <div class="contenu-etablissement">
+            @if (e.logo) {
+              <img [src]="e.logo" alt="Logo" class="logo-etablissement" />
+            } @else {
+              <div class="logo-etablissement logo-etablissement-vide"><mat-icon>school</mat-icon></div>
+            }
+            <div class="details-etablissement">
+              <div class="nom-etablissement">{{ e.nom }}</div>
+              <div class="muted small-text">{{ e.adresse || 'Adresse non renseignée' }}</div>
+              <div class="muted small-text">{{ e.telephone || 'Téléphone non renseigné' }}</div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="surface-card">
+        <div class="card-head">
+          <h3>Années académiques</h3>
+          <div class="card-head-actions">
+            <button mat-stroked-button (click)="ouvrirReconduction()">
+              <mat-icon>repeat</mat-icon> Reconduire vers une autre année
+            </button>
+            <button mat-icon-button (click)="ouvrirAjoutAnnee()" matTooltip="Ajouter"><mat-icon>add</mat-icon></button>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead><tr><th>Libellé</th><th>Période</th><th></th></tr></thead>
+            <tbody>
+              @for (a of paginationAnnees.page(); track a.id) {
+                <tr>
+                  <td>{{ a.libelle }}</td>
+                  <td class="muted">{{ a.dateDebut }} → {{ a.dateFin }}</td>
+                  <td>
+                    <button mat-icon-button (click)="ouvrirEditionAnnee(a)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button (click)="supprimerAnnee(a.id)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+              } @empty { <tr><td colspan="3" class="muted">Aucune année.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+        <mat-paginator
+          [length]="annees().length"
+          [pageSize]="paginationAnnees.taillePage"
+          [pageIndex]="paginationAnnees.pageIndex()"
+          [hidePageSize]="true"
+          (page)="paginationAnnees.onPageChange($event)"
+        ></mat-paginator>
+      </div>
+
+      <div class="surface-card">
+        <div class="card-head">
+          <h3>Semestres</h3>
+          <button mat-icon-button (click)="ouvrirAjoutSemestre()" matTooltip="Ajouter"><mat-icon>add</mat-icon></button>
+        </div>
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead><tr><th>Libellé</th><th>Année</th><th></th></tr></thead>
+            <tbody>
+              @for (s of paginationSemestres.page(); track s.id) {
+                <tr>
+                  <td>{{ s.libelle }}</td>
+                  <td class="muted">{{ anneeLibelle(s.anneeAcademiqueId) }}</td>
+                  <td>
+                    <button mat-icon-button (click)="ouvrirEditionSemestre(s)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button (click)="supprimerSemestre(s.id)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+              } @empty { <tr><td colspan="3" class="muted">Aucun semestre.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+        <mat-paginator
+          [length]="semestres().length"
+          [pageSize]="paginationSemestres.taillePage"
+          [pageIndex]="paginationSemestres.pageIndex()"
+          [hidePageSize]="true"
+          (page)="paginationSemestres.onPageChange($event)"
+        ></mat-paginator>
+      </div>
+
+      <div class="surface-card">
+        <div class="card-head">
+          <h3>Domaines</h3>
+          <button mat-icon-button (click)="ouvrirAjoutDomaine()" matTooltip="Ajouter"><mat-icon>add</mat-icon></button>
+        </div>
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead><tr><th>Code</th><th>Libellé</th><th></th></tr></thead>
+            <tbody>
+              @for (d of paginationDomaines.page(); track d.id) {
+                <tr>
+                  <td><code>{{ d.code }}</code></td>
+                  <td>{{ d.libelle }}</td>
+                  <td>
+                    <button mat-icon-button (click)="ouvrirEditionDomaine(d)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button (click)="supprimerDomaine(d.id)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+              }
+              @empty { <tr><td colspan="3" class="muted">Aucun domaine.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+        <mat-paginator
+          [length]="domaines().length"
+          [pageSize]="paginationDomaines.taillePage"
+          [pageIndex]="paginationDomaines.pageIndex()"
+          [hidePageSize]="true"
+          (page)="paginationDomaines.onPageChange($event)"
+        ></mat-paginator>
+      </div>
+
+      <div class="surface-card">
+        <div class="card-head">
+          <h3>Mentions</h3>
+          <button mat-icon-button (click)="ouvrirAjoutMention()" matTooltip="Ajouter"><mat-icon>add</mat-icon></button>
+        </div>
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead><tr><th>Code</th><th>Libellé</th><th></th></tr></thead>
+            <tbody>
+              @for (m of paginationMentions.page(); track m.id) {
+                <tr>
+                  <td><code>{{ m.code }}</code></td>
+                  <td>{{ m.libelle }}</td>
+                  <td>
+                    <button mat-icon-button (click)="ouvrirEditionMention(m)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button (click)="supprimerMention(m.id)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+              }
+              @empty { <tr><td colspan="3" class="muted">Aucune mention.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+        <mat-paginator
+          [length]="mentions().length"
+          [pageSize]="paginationMentions.taillePage"
+          [pageIndex]="paginationMentions.pageIndex()"
+          [hidePageSize]="true"
+          (page)="paginationMentions.onPageChange($event)"
+        ></mat-paginator>
+      </div>
+
+      <div class="surface-card">
+        <div class="card-head">
+          <h3>Options</h3>
+          <button mat-icon-button (click)="ouvrirAjoutOption()" matTooltip="Ajouter"><mat-icon>add</mat-icon></button>
+        </div>
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead><tr><th>Code</th><th>Libellé</th><th></th></tr></thead>
+            <tbody>
+              @for (o of paginationOptions.page(); track o.id) {
+                <tr>
+                  <td><code>{{ o.code }}</code></td>
+                  <td>{{ o.libelle }}</td>
+                  <td>
+                    <button mat-icon-button (click)="ouvrirEditionOption(o)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button (click)="supprimerOption(o.id)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+              }
+              @empty { <tr><td colspan="3" class="muted">Aucune option.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+        <mat-paginator
+          [length]="options().length"
+          [pageSize]="paginationOptions.taillePage"
+          [pageIndex]="paginationOptions.pageIndex()"
+          [hidePageSize]="true"
+          (page)="paginationOptions.onPageChange($event)"
+        ></mat-paginator>
+      </div>
+
+      <div class="surface-card">
+        <div class="card-head">
+          <h3>Filières (Spécialité / Filière)</h3>
+          <button mat-icon-button (click)="ouvrirAjoutFiliere()" matTooltip="Ajouter"><mat-icon>add</mat-icon></button>
+        </div>
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead><tr><th>Code</th><th>Libellé</th><th>Grade</th><th></th></tr></thead>
+            <tbody>
+              @for (f of paginationFilieres.page(); track f.id) {
+                <tr>
+                  <td><code>{{ f.code }}</code></td>
+                  <td>{{ f.libelle }}</td>
+                  <td class="muted">{{ f.grade || '—' }}</td>
+                  <td>
+                    <button mat-icon-button (click)="ouvrirEditionFiliere(f)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button (click)="supprimerFiliere(f.id)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+              }
+              @empty { <tr><td colspan="4" class="muted">Aucune filière.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+        <mat-paginator
+          [length]="filieres().length"
+          [pageSize]="paginationFilieres.taillePage"
+          [pageIndex]="paginationFilieres.pageIndex()"
+          [hidePageSize]="true"
+          (page)="paginationFilieres.onPageChange($event)"
+        ></mat-paginator>
+      </div>
+
+      <div class="surface-card">
+        <div class="card-head">
+          <h3>Salles</h3>
+          <button mat-icon-button (click)="ouvrirAjoutSalle()" matTooltip="Ajouter"><mat-icon>add</mat-icon></button>
+        </div>
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead><tr><th>Code</th><th>Libellé</th><th>Capacité</th><th>Type</th><th></th></tr></thead>
+            <tbody>
+              @for (s of paginationSalles.page(); track s.id) {
+                <tr>
+                  <td><code>{{ s.code }}</code></td>
+                  <td>{{ s.libelle }}</td>
+                  <td class="numeric">{{ s.capacite }}</td>
+                  <td>{{ s.type }}</td>
+                  <td>
+                    <button mat-icon-button (click)="ouvrirEditionSalle(s)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button (click)="supprimerSalle(s.id)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+              } @empty { <tr><td colspan="5" class="muted">Aucune salle.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+        <mat-paginator
+          [length]="salles().length"
+          [pageSize]="paginationSalles.taillePage"
+          [pageIndex]="paginationSalles.pageIndex()"
+          [hidePageSize]="true"
+          (page)="paginationSalles.onPageChange($event)"
+        ></mat-paginator>
+      </div>
+
+      <div class="surface-card">
+        <div class="card-head">
+          <h3>Niveaux</h3>
+          <button mat-icon-button (click)="ouvrirAjoutNiveau()" matTooltip="Ajouter"><mat-icon>add</mat-icon></button>
+        </div>
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead><tr><th>Libellé</th><th>Ordre</th><th></th></tr></thead>
+            <tbody>
+              @for (n of paginationNiveaux.page(); track n.id) {
+                <tr>
+                  <td>{{ n.libelle }}</td>
+                  <td class="numeric">{{ n.ordre }}</td>
+                  <td>
+                    <button mat-icon-button (click)="ouvrirEditionNiveau(n)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button (click)="supprimerNiveau(n.id)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+              } @empty { <tr><td colspan="3" class="muted">Aucun niveau.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+        <mat-paginator
+          [length]="niveauxTries().length"
+          [pageSize]="paginationNiveaux.taillePage"
+          [pageIndex]="paginationNiveaux.pageIndex()"
+          [hidePageSize]="true"
+          (page)="paginationNiveaux.onPageChange($event)"
+        ></mat-paginator>
+      </div>
+
+      <div class="surface-card">
+        <div class="card-head">
+          <h3>Nationalités</h3>
+          <button mat-icon-button (click)="ouvrirAjoutNationalite()" matTooltip="Ajouter"><mat-icon>add</mat-icon></button>
+        </div>
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead><tr><th>Code</th><th>Libellé</th><th></th></tr></thead>
+            <tbody>
+              @for (n of paginationNationalites.page(); track n.id) {
+                <tr>
+                  <td class="muted">{{ n.code }}</td>
+                  <td>{{ n.libelle }}</td>
+                  <td>
+                    <button mat-icon-button (click)="ouvrirEditionNationalite(n)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button (click)="supprimerNationalite(n.id)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+              } @empty { <tr><td colspan="3" class="muted">Aucune nationalité.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+        <mat-paginator
+          [length]="nationalites().length"
+          [pageSize]="paginationNationalites.taillePage"
+          [pageIndex]="paginationNationalites.pageIndex()"
+          [hidePageSize]="true"
+          (page)="paginationNationalites.onPageChange($event)"
+        ></mat-paginator>
+      </div>
+
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Financier">
+    <div class="card-grid tab-content">
+
+      <div class="surface-card" style="grid-column: 1 / -1;">
+        <div class="card-head">
+          <h3>Engagements (frais)</h3>
+          <button mat-icon-button (click)="ouvrirAjoutEngagement()" matTooltip="Ajouter"><mat-icon>add</mat-icon></button>
+        </div>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" style="padding: 0 18px; max-width: 260px;">
+          <mat-label>Année académique</mat-label>
+          <mat-select [value]="anneeSelectionneeId()" (selectionChange)="anneeSelectionneeId.set($event.value)">
+            @for (a of annees(); track a.id) { <mat-option [value]="a.id">{{ a.libelle }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>Niveau</th>
+                @for (t of typesEngagementPivot; track t.type) { <th>{{ t.label }}</th> }
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (n of paginationEngagementsNiveaux.page(); track n.id) {
+                <tr>
+                  <td>{{ n.libelle }}</td>
+                  @for (t of typesEngagementPivot; track t.type) {
+                    <td class="numeric">{{ montantPour(n.id, t.type) | number: '1.0-0' }}</td>
+                  }
+                  <td>
+                    <button mat-icon-button (click)="editerEngagementsNiveau(n.id)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button (click)="supprimerNiveau(n.id)" matTooltip="Supprimer le niveau"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <mat-paginator
+          [length]="niveauxTries().length"
+          [pageSize]="paginationEngagementsNiveaux.taillePage"
+          [pageIndex]="paginationEngagementsNiveaux.pageIndex()"
+          [hidePageSize]="true"
+          (page)="paginationEngagementsNiveaux.onPageChange($event)"
+        ></mat-paginator>
+      </div>
+
+      <div class="surface-card">
+        <div class="card-head">
+          <h3>Modes de paiement</h3>
+          <button mat-icon-button (click)="ouvrirAjoutMode()" matTooltip="Ajouter"><mat-icon>add</mat-icon></button>
+        </div>
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead><tr><th>Libellé</th><th>Type</th><th></th></tr></thead>
+            <tbody>
+              @for (m of paginationModesPaiement.page(); track m.id) {
+                <tr>
+                  <td>{{ m.libelle }}</td>
+                  <td>{{ m.type }}</td>
+                  <td>
+                    <button mat-icon-button (click)="ouvrirEditionMode(m)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button (click)="supprimerMode(m.id)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+              }
+              @empty { <tr><td colspan="3" class="muted">Aucun mode de paiement.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+        <mat-paginator
+          [length]="modesPaiement().length"
+          [pageSize]="paginationModesPaiement.taillePage"
+          [pageIndex]="paginationModesPaiement.pageIndex()"
+          [hidePageSize]="true"
+          (page)="paginationModesPaiement.onPageChange($event)"
+        ></mat-paginator>
+      </div>
+
+      <div class="surface-card">
+        <div class="card-head">
+          <h3>Partenaires</h3>
+          <button mat-icon-button (click)="ouvrirAjoutPartenaire()" matTooltip="Ajouter"><mat-icon>add</mat-icon></button>
+        </div>
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead><tr><th>Nom</th><th>Type</th><th>Contact</th><th></th></tr></thead>
+            <tbody>
+              @for (p of paginationPartenaires.page(); track p.id) {
+                <tr>
+                  <td>{{ p.nom }}</td>
+                  <td class="muted">{{ p.type || '—' }}</td>
+                  <td class="muted">{{ p.contact || '—' }}</td>
+                  <td>
+                    <button mat-icon-button (click)="ouvrirEditionPartenaire(p)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button (click)="supprimerPartenaire(p.id)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+              }
+              @empty { <tr><td colspan="4" class="muted">Aucun partenaire.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+        <mat-paginator
+          [length]="partenaires().length"
+          [pageSize]="paginationPartenaires.taillePage"
+          [pageIndex]="paginationPartenaires.pageIndex()"
+          [hidePageSize]="true"
+          (page)="paginationPartenaires.onPageChange($event)"
+        ></mat-paginator>
+      </div>
+
+    </div>
+  </mat-tab>
+</mat-tab-group>

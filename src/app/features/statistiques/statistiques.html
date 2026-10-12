@@ -1,0 +1,383 @@
+<div class="page-header">
+  <div>
+    <h1>Statistiques</h1>
+    <p>Lecture agrégée sur les paiements — aucune saisie ici, tout est calculé.</p>
+  </div>
+</div>
+
+<mat-tab-group animationDuration="120ms">
+  <mat-tab label="Brouillard">
+    <div class="tab-content surface-card">
+      <div class="card-head">
+        <h3>Brouillard des paiements</h3>
+        <button mat-button (click)="imprimerBrouillard()" [disabled]="!brouillard()"><mat-icon>print</mat-icon> Imprimer</button>
+      </div>
+      <form [formGroup]="formBrouillard" (ngSubmit)="chargerBrouillard()" class="inline-form">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="small">
+          <mat-label>Du</mat-label>
+          <input matInput type="date" formControlName="dateDebut" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="small">
+          <mat-label>Au</mat-label>
+          <input matInput type="date" formControlName="dateFin" />
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="submit">Filtrer</button>
+      </form>
+
+      @if (chargementBrouillard()) {
+        <div class="spinner-row"><mat-spinner diameter="28" /></div>
+      } @else {
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead><tr><th>Date</th><th>Étudiant</th><th>Engagement</th><th>Mode</th><th>Reçu</th><th>Montant</th></tr></thead>
+            <tbody>
+              @for (l of brouillard(); track l.paiementId) {
+                <tr>
+                  <td class="muted">{{ l.datePaiement }}</td>
+                  <td>{{ l.etudiantNomComplet }} <span class="muted small-text">({{ l.matricule }})</span></td>
+                  <td>{{ l.engagementLibelle }}</td>
+                  <td class="muted">{{ l.modePaiementLibelle }}</td>
+                  <td><code>{{ l.numeroRecu || '—' }}</code></td>
+                  <td class="numeric">{{ l.montant | number: '1.0-0' }}</td>
+                </tr>
+              } @empty { <tr><td colspan="6" class="muted">Aucun paiement sur cette période.</td></tr> }
+            </tbody>
+            @if (brouillard()?.length) {
+              <tfoot>
+                <tr><td colspan="5" class="total-label">Total</td><td class="numeric total-value">{{ totalBrouillard() | number: '1.0-0' }}</td></tr>
+              </tfoot>
+            }
+          </table>
+        </div>
+      }
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Situation étudiant">
+    <div class="tab-content surface-card">
+      @if (detailEtudiant(); as d) {
+        <!-- Étape 3 : détail du plan de paiement de l'étudiant choisi -->
+        <div class="card-head">
+          <div>
+            <h3>Details paiement de l'étudiant</h3>
+            <p class="muted">{{ d.nomComplet }} ({{ d.matricule }}) — {{ d.classeLibelle }}</p>
+          </div>
+          <button mat-button (click)="retourListeEtudiants()"><mat-icon>arrow_back</mat-icon> Retour</button>
+        </div>
+
+        <div class="situation-grid">
+          <div class="stat-tile"><div class="stat-value">{{ d.totalPrevu | number: '1.0-0' }}</div><div class="stat-label">Total prévu</div></div>
+          <div class="stat-tile"><div class="stat-value">{{ d.totalPaye | number: '1.0-0' }}</div><div class="stat-label">Total payé</div></div>
+          <div class="stat-tile" [class.solde-positif]="resteAPayerEtudiant() > 0" [class.solde-nul]="resteAPayerEtudiant() <= 0">
+            <div class="stat-value">{{ resteAPayerEtudiant() | number: '1.0-0' }}</div>
+            <div class="stat-label">Reste à payer</div>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>N° Reçu</th>
+                <th>Date paiement</th>
+                <th>Mois</th>
+                <th>Montant prévu</th>
+                <th>Mode réglement</th>
+                <th>Montant payé</th>
+                <th>Libellé opération</th>
+                <th>Observations</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of d.echeances; track e.echeancePrevueId) {
+                <tr>
+                  <td class="muted">{{ e.numeroRecu || '—' }}</td>
+                  <td class="muted">{{ e.datePaiement || '—' }}</td>
+                  <td>{{ libelleMois(e.dateEcheance) }}</td>
+                  <td class="numeric">{{ e.montantPrevu | number: '1.0-0' }}</td>
+                  <td class="muted">{{ e.modePaiementLibelle || '—' }}</td>
+                  <td class="numeric">{{ e.montantPaye | number: '1.0-0' }}</td>
+                  <td>{{ libelleType(e.type) }}</td>
+                  <td class="muted">{{ e.reference || '—' }}</td>
+                  <td>
+                    @if (e.paiementId) {
+                      <button mat-icon-button (click)="imprimerRecuEtudiant(e.paiementId)" matTooltip="Imprimer le reçu">
+                        <mat-icon>print</mat-icon>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              } @empty { <tr><td colspan="9" class="muted">Aucune échéance planifiée pour cet étudiant.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+      } @else if (classeEtudiants(); as s) {
+        <!-- Étape 2 : liste des étudiants de la classe choisie -->
+        <div class="card-head">
+          <div><h3>Étudiants — {{ s.classeLibelle }}</h3></div>
+          <div>
+            <button mat-button (click)="imprimerSituationEtudiant()"><mat-icon>print</mat-icon> Imprimer</button>
+            <button mat-button (click)="changerClasseEtudiants()"><mat-icon>arrow_back</mat-icon> Changer de classe</button>
+          </div>
+        </div>
+        @if (chargementClasseEtudiants()) {
+          <div class="spinner-row"><mat-spinner diameter="28" /></div>
+        } @else {
+          <div class="table-scroll">
+            <table class="styled-table">
+              <thead><tr><th>Étudiant</th><th>Dû</th><th>Payé</th><th>Solde</th><th></th></tr></thead>
+              <tbody>
+                @for (l of s.etudiants; track l.etudiantId) {
+                  <tr>
+                    <td>{{ l.nomComplet }} <span class="muted small-text">({{ l.matricule }})</span></td>
+                    <td class="numeric muted">{{ l.totalDu | number: '1.0-0' }}</td>
+                    <td class="numeric muted">{{ l.totalPaye | number: '1.0-0' }}</td>
+                    <td class="numeric">
+                      <span class="status-chip" [class.chip-error]="l.solde > 0" [class.chip-success]="l.solde <= 0">
+                        {{ l.solde | number: '1.0-0' }}
+                      </span>
+                    </td>
+                    <td><button mat-button color="primary" (click)="voirDetailEtudiant(l.inscriptionId)">Voir</button></td>
+                  </tr>
+                } @empty { <tr><td colspan="5" class="muted">Aucun étudiant inscrit dans cette classe.</td></tr> }
+              </tbody>
+            </table>
+          </div>
+        }
+      } @else {
+        <!-- Étape 1 : choix de la classe -->
+        <div class="card-head"><h3>Situation de paiement par étudiant</h3></div>
+        <form [formGroup]="formClasseEtudiants" (ngSubmit)="chargerEtudiantsClasse()" class="inline-form">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grow">
+            <mat-label>Classe</mat-label>
+            <mat-select formControlName="classeId">
+              @for (c of classes(); track c.id) { <mat-option [value]="c.id">{{ c.libelle }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+          <button mat-flat-button color="primary" type="submit">Voir les étudiants</button>
+        </form>
+      }
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Situation classe">
+    <div class="tab-content surface-card">
+      @if (detailEtudiantMensuel(); as d) {
+        <!-- Étape 4 : détail du plan de paiement de l'étudiant choisi -->
+        <div class="card-head">
+          <div>
+            <h3>Details paiement de l'étudiant</h3>
+            <p class="muted">{{ d.nomComplet }} ({{ d.matricule }}) — {{ d.classeLibelle }}</p>
+          </div>
+          <button mat-button (click)="fermerDetailMensuel()"><mat-icon>arrow_back</mat-icon> Retour</button>
+        </div>
+
+        <div class="situation-grid">
+          <div class="stat-tile"><div class="stat-value">{{ d.totalPrevu | number: '1.0-0' }}</div><div class="stat-label">Total prévu</div></div>
+          <div class="stat-tile"><div class="stat-value">{{ d.totalPaye | number: '1.0-0' }}</div><div class="stat-label">Total payé</div></div>
+          <div class="stat-tile" [class.solde-positif]="resteAPayerMensuel() > 0" [class.solde-nul]="resteAPayerMensuel() <= 0">
+            <div class="stat-value">{{ resteAPayerMensuel() | number: '1.0-0' }}</div>
+            <div class="stat-label">Reste à payer</div>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>N° Reçu</th>
+                <th>Date paiement</th>
+                <th>Mois</th>
+                <th>Montant prévu</th>
+                <th>Mode réglement</th>
+                <th>Montant payé</th>
+                <th>Libellé opération</th>
+                <th>Observations</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of d.echeances; track e.echeancePrevueId) {
+                <tr>
+                  <td class="muted">{{ e.numeroRecu || '—' }}</td>
+                  <td class="muted">{{ e.datePaiement || '—' }}</td>
+                  <td>{{ libelleMois(e.dateEcheance) }}</td>
+                  <td class="numeric">{{ e.montantPrevu | number: '1.0-0' }}</td>
+                  <td class="muted">{{ e.modePaiementLibelle || '—' }}</td>
+                  <td class="numeric">{{ e.montantPaye | number: '1.0-0' }}</td>
+                  <td>{{ libelleType(e.type) }}</td>
+                  <td class="muted">{{ e.reference || '—' }}</td>
+                  <td>
+                    @if (e.paiementId) {
+                      <button mat-icon-button (click)="imprimerRecuEtudiant(e.paiementId)" matTooltip="Imprimer le reçu">
+                        <mat-icon>print</mat-icon>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              } @empty { <tr><td colspan="9" class="muted">Aucune échéance planifiée pour cet étudiant.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+      } @else if (situationMensuelle(); as s) {
+        <!-- Étape 3 : étudiants payants / non payants pour le mois choisi -->
+        <div class="card-head">
+          <div>
+            <h3>Étudiants — {{ s.classeLibelle }}</h3>
+            <p class="muted">Mois : {{ libelleMoisAnnee(s.mois, s.annee) }}</p>
+          </div>
+          <div>
+            <button mat-button (click)="imprimerSituationClasse()"><mat-icon>print</mat-icon> Imprimer</button>
+            <button mat-button (click)="retourMoisSelection()"><mat-icon>arrow_back</mat-icon> Changer de mois</button>
+          </div>
+        </div>
+
+        <div class="inline-form">
+          <mat-button-toggle-group [value]="ongletMensuel()" (change)="ongletMensuel.set($event.value)">
+            <mat-button-toggle value="payants">Payants ({{ s.payants.length }})</mat-button-toggle>
+            <mat-button-toggle value="nonPayants">Non payants ({{ s.nonPayants.length }})</mat-button-toggle>
+          </mat-button-toggle-group>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grow">
+            <mat-label>Recherche (matricule, nom, prénom)</mat-label>
+            <input matInput [value]="rechercheMensuelle()" (input)="rechercheMensuelle.set($any($event.target).value)" />
+          </mat-form-field>
+        </div>
+
+        @if (chargementSituationMensuelle()) {
+          <div class="spinner-row"><mat-spinner diameter="28" /></div>
+        } @else {
+          <div class="table-scroll">
+            <table class="styled-table">
+              <thead>
+                <tr>
+                  <th>Matricule</th>
+                  <th>Nom</th>
+                  <th>Prénom</th>
+                  <th>Téléphone</th>
+                  <th>Date naissance</th>
+                  <th>Lieu de naissance</th>
+                  <th>Genre</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (l of listeMensuelleActive(); track l.etudiantId) {
+                  <tr>
+                    <td class="muted">{{ l.matricule }}</td>
+                    <td>{{ l.nom }}</td>
+                    <td>{{ l.prenom }}</td>
+                    <td class="muted">{{ l.telephone || '—' }}</td>
+                    <td class="muted">{{ l.dateNaissance || '—' }}</td>
+                    <td class="muted">{{ l.lieuNaissance || '—' }}</td>
+                    <td class="muted">{{ libelleGenre(l.genre) }}</td>
+                    <td><button mat-button color="primary" (click)="voirDetailEtudiantMensuel(l.inscriptionId)">Voir</button></td>
+                  </tr>
+                } @empty { <tr><td colspan="8" class="muted">Aucun étudiant dans cette liste.</td></tr> }
+              </tbody>
+            </table>
+          </div>
+        }
+      } @else if (classeMensuelleChoisie(); as c) {
+        <!-- Étape 2 : choix du mois -->
+        <div class="card-head">
+          <div><h3>Situation de paiement de scolarité — {{ c.libelle }}</h3></div>
+          <button mat-button (click)="changerClasseMensuelle()"><mat-icon>arrow_back</mat-icon> Changer de classe</button>
+        </div>
+        <form [formGroup]="formMois" (ngSubmit)="chargerPaiementsMensuels()" class="inline-form">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="small">
+            <mat-label>Année académique</mat-label>
+            <mat-select formControlName="annee">
+              @for (a of anneesAcademiques(); track a.id) { <mat-option [value]="a.id">{{ a.libelle }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grow">
+            <mat-label>Mois</mat-label>
+            <mat-select formControlName="mois">
+              @for (m of optionsMois; track m.valeur) { <mat-option [value]="m.valeur">{{ m.libelle }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+          <button mat-flat-button color="primary" type="submit">Charger les paiements</button>
+        </form>
+      } @else {
+        <!-- Étape 1 : choix de la classe -->
+        <div class="card-head"><h3>Situation de paiement par classe</h3></div>
+        <form [formGroup]="formClasse" (ngSubmit)="consulterClasse()" class="inline-form">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grow">
+            <mat-label>Classe</mat-label>
+            <mat-select formControlName="classeId">
+              @for (c of classes(); track c.id) { <mat-option [value]="c.id">{{ c.libelle }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+          <button mat-flat-button color="primary" type="submit">Consulter</button>
+        </form>
+      }
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Impayés">
+    <div class="tab-content surface-card">
+      <div class="card-head"><h3>Situation de paiement de scolarité</h3></div>
+      <form [formGroup]="formImpayes" (ngSubmit)="chargerImpayesMensuel()" class="inline-form">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="small">
+          <mat-label>Année académique</mat-label>
+          <mat-select formControlName="annee">
+            @for (a of anneesAcademiques(); track a.id) { <mat-option [value]="a.id">{{ a.libelle }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grow">
+          <mat-label>Mois</mat-label>
+          <mat-select formControlName="mois">
+            @for (m of optionsMois; track m.valeur) { <mat-option [value]="m.valeur">{{ m.libelle }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="submit">Charger les paiements</button>
+      </form>
+
+      @if (chargementImpayes()) {
+        <div class="spinner-row"><mat-spinner diameter="28" /></div>
+      } @else if (impayesMensuel(); as r) {
+        <div class="card-head">
+          <div></div>
+          <button mat-button (click)="imprimerImpayes()"><mat-icon>print</mat-icon> Imprimer</button>
+        </div>
+        <div class="situation-grid">
+          <div class="stat-tile"><div class="stat-value">{{ r.totalEngagement | number: '1.0-0' }}</div><div class="stat-label">Total engagement</div></div>
+          <div class="stat-tile"><div class="stat-value">{{ r.totalPaye | number: '1.0-0' }}</div><div class="stat-label">Total payé ({{ pourcentagePayeImpayes() }} %)</div></div>
+          <div class="stat-tile" [class.solde-positif]="r.resteAPayer > 0" [class.solde-nul]="r.resteAPayer <= 0">
+            <div class="stat-value">{{ r.resteAPayer | number: '1.0-0' }}</div>
+            <div class="stat-label">Reste à payer ({{ pourcentageResteImpayes() }} %)</div>
+          </div>
+        </div>
+
+        <div class="inline-form">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grow">
+            <mat-label>Recherche (matricule, nom)</mat-label>
+            <input matInput [value]="rechercheImpayes()" (input)="rechercheImpayes.set($any($event.target).value)" />
+          </mat-form-field>
+        </div>
+
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead><tr><th>Matricule</th><th>Étudiant</th><th>Montant prévu</th><th>Montant payé</th><th>Montant restant</th></tr></thead>
+            <tbody>
+              @for (l of lignesImpayesFiltrees(); track l.etudiantId) {
+                <tr>
+                  <td class="muted">{{ l.matricule }}</td>
+                  <td>{{ l.nomComplet }} <span class="muted small-text">, né(e) le {{ l.dateNaissance || '—' }} à {{ l.lieuNaissance || '—' }}</span></td>
+                  <td class="numeric muted">{{ l.montantPrevu | number: '1.0-0' }}</td>
+                  <td class="numeric muted">{{ l.montantPaye | number: '1.0-0' }}</td>
+                  <td class="numeric">
+                    <span class="status-chip" [class.chip-error]="l.montantRestant > 0" [class.chip-success]="l.montantRestant <= 0">
+                      {{ l.montantRestant | number: '1.0-0' }}
+                    </span>
+                  </td>
+                </tr>
+              } @empty { <tr><td colspan="5" class="muted">Aucun étudiant.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </mat-tab>
+</mat-tab-group>

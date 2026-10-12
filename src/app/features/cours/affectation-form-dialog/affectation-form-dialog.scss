@@ -1,0 +1,37 @@
+.contenu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 560px;
+}
+
+.section-banner {
+  margin: 0 0 12px;
+  padding: 6px 14px;
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-align: center;
+  border-radius: 6px;
+}
+
+.ligne {
+  display: flex;
+  gap: 12px;
+
+  mat-form-field {
+    flex: 1;
+  }
+  mat-form-field.grow {
+    flex: 2;
+  }
+  mat-form-field.small {
+    flex: 0.6;
+  }
+}
+
+.erreur {
+  color: var(--mat-sys-error);
+  font-size: 0.9rem;
+}

@@ -1,0 +1,51 @@
+<h2 mat-dialog-title>Ajouter un élément constitutif</h2>
+
+<form [formGroup]="form" (ngSubmit)="soumettre()">
+  <mat-dialog-content class="contenu">
+    <p class="muted">Unité d'enseignement : <strong>{{ data.uniteEnseignement.intitule }}</strong></p>
+    <div class="ligne">
+      <mat-form-field appearance="outline" class="small">
+        <mat-label>Code</mat-label>
+        <input matInput formControlName="code" placeholder="EC-BUR1" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="grow">
+        <mat-label>Intitulé</mat-label>
+        <input matInput formControlName="intitule" />
+      </mat-form-field>
+    </div>
+    <div class="ligne">
+      <mat-form-field appearance="outline">
+        <mat-label>CM (h)</mat-label>
+        <input matInput type="number" formControlName="volumeHoraireCm" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>TD/TP (h)</mat-label>
+        <input matInput type="number" formControlName="volumeHoraireTdTp" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>TPE (h)</mat-label>
+        <input matInput type="number" formControlName="volumeHoraireTpe" />
+      </mat-form-field>
+    </div>
+    <p class="muted">Crédits (calculés automatiquement, 20h = 1 crédit) : <strong>{{ creditsApercu() }}</strong></p>
+    <mat-form-field appearance="outline" class="small">
+      <mat-label>Coefficient</mat-label>
+      <input matInput type="number" formControlName="coefficient" (input)="surCoefficientSaisiManuellement()" />
+    </mat-form-field>
+
+    @if (erreur()) {
+      <p class="erreur">{{ erreur() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="annuler()">Annuler</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="enCours()">
+      @if (enCours()) {
+        <mat-spinner diameter="20" />
+      } @else {
+        Ajouter
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

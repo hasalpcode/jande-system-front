@@ -1,0 +1,156 @@
+<div class="page-header">
+  <div>
+    <h1>Paiements</h1>
+    <p>Encaissements, calendrier prévisionnel par étudiant et pointage carte au poste de caisse.</p>
+  </div>
+</div>
+
+<mat-tab-group animationDuration="120ms">
+  <mat-tab label="Paiements">
+    <div class="tab-content surface-card">
+      @if (chargement()) {
+        <div class="loading-block"><span class="spinner"></span> Chargement…</div>
+      } @else if (!calendrier()) {
+        <div class="card-head">
+          <h3>Liste des étudiants inscrits</h3>
+        </div>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="recherche-etudiant">
+          <mat-label>Recherche</mat-label>
+          <input matInput placeholder="matricule, nom, prénom" [value]="rechercheEtudiant()" (input)="onRechercheChange($event)" />
+        </mat-form-field>
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>Matricule</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Téléphone</th>
+                <th>Date Naissance</th>
+                <th>Lieu de Naissance</th>
+                <th>Genre</th>
+                <th>Classe</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (i of inscriptionsPagees(); track i.inscriptionId) {
+                <tr>
+                  <td class="muted">{{ i.matricule }}</td>
+                  <td>{{ i.nom }}</td>
+                  <td>{{ i.prenom }}</td>
+                  <td class="muted">{{ i.telephone || '—' }}</td>
+                  <td class="muted">{{ i.dateNaissance ? (i.dateNaissance | date: 'dd/MM/yyyy') : '—' }}</td>
+                  <td class="muted">{{ i.lieuNaissance || '—' }}</td>
+                  <td class="muted">{{ i.sexe || '—' }}</td>
+                  <td class="muted">{{ i.classeLibelle }}</td>
+                  <td><button mat-flat-button color="primary" (click)="ouvrirDetail(i.inscriptionId)">Details/Ajout</button></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="9" class="muted">Aucune inscription validée pour l'instant.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <mat-paginator
+          [length]="inscriptionsFiltrees().length"
+          [pageSize]="taillePage"
+          [pageIndex]="pageIndex()"
+          [hidePageSize]="true"
+          (page)="onPageChange($event)"
+        ></mat-paginator>
+      } @else if (chargementCalendrier()) {
+        <div class="loading-block"><span class="spinner"></span> Chargement…</div>
+      } @else {
+        @let c = calendrier()!;
+        <div class="card-head">
+          <div>
+            <h3>Details paiement</h3>
+            <p class="muted">{{ c.nomComplet }} ({{ c.matricule }}) — {{ c.classeLibelle }}</p>
+          </div>
+          <button mat-button (click)="retour()"><mat-icon>arrow_back</mat-icon> Retour</button>
+        </div>
+
+        <div class="page-header-actions" style="padding: 0 18px 12px;">
+          <button mat-flat-button color="primary" (click)="ouvrirAjoutPaiement()">
+            <mat-icon>add</mat-icon> Ajouter nouveau paiement
+          </button>
+        </div>
+
+        <h3 style="padding: 16px 18px 0;">Calendrier prévisionnel des paiements</h3>
+        <div class="situation-grid">
+          <div class="stat-tile">
+            <div class="stat-value">{{ c.echeances.length }}</div>
+            <div class="stat-label">Échéances prévues</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-value">{{ c.totalPrevu | number: '1.0-0' }}</div>
+            <div class="stat-label">Montant total prévu</div>
+          </div>
+          <div class="stat-tile">
+            <div class="stat-value">{{ c.totalPaye | number: '1.0-0' }}</div>
+            <div class="stat-label">Cumul paiements encaissés</div>
+          </div>
+          <div class="stat-tile" [class.solde-positif]="resteAPayer() > 0" [class.solde-nul]="resteAPayer() <= 0">
+            <div class="stat-value">{{ resteAPayer() | number: '1.0-0' }}</div>
+            <div class="stat-label">Reste à payer</div>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>N° Reçu</th>
+                <th>Mois</th>
+                <th>Montant prévu</th>
+                <th>Mode réglement</th>
+                <th>Montant payé</th>
+                <th>Libellé opération</th>
+                <th>Observations</th>
+                <th>Enregistré par</th>
+                <th>Statut</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of c.echeances; track e.echeancePrevueId) {
+                <tr>
+                  <td class="muted">{{ e.numeroRecu || '—' }}</td>
+                  <td>{{ libelleMois(e.dateEcheance) }}</td>
+                  <td class="numeric">{{ e.montantPrevu | number: '1.0-0' }}</td>
+                  <td class="muted">{{ e.modePaiementLibelle || '—' }}</td>
+                  <td class="numeric">{{ e.montantPaye | number: '1.0-0' }}</td>
+                  <td>{{ libelleType(e.type) }}</td>
+                  <td class="muted">{{ e.reference || '—' }}</td>
+                  <td class="muted">{{ e.utilisateurCode || '—' }}</td>
+                  <td>
+                    <span
+                      class="status-chip"
+                      [class.chip-success]="e.statut === 'PAYEE'"
+                      [class.chip-warning]="e.statut === 'PARTIELLE'"
+                      [class.chip-error]="e.statut === 'EN_RETARD'"
+                      [class.chip-neutral]="e.statut === 'A_VENIR'"
+                    >{{ e.statut === 'A_VENIR' ? 'à venir' : e.statut === 'EN_RETARD' ? 'en retard' : e.statut === 'PARTIELLE' ? 'partielle' : 'payée' }}</span>
+                  </td>
+                  <td>
+                    @if (e.paiementId) {
+                      <button mat-icon-button (click)="imprimerRecu(e.paiementId)" matTooltip="Imprimer le reçu">
+                        <mat-icon>print</mat-icon>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="10" class="muted">Aucune échéance planifiée pour cette inscription.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </mat-tab>
+
+  <!-- Onglet "Pointage carte" masqué côté front pour le moment - voir paiements.ts pour
+       la logique encore en place, inchangée. -->
+</mat-tab-group>

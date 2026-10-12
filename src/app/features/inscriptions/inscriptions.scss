@@ -1,0 +1,29 @@
+.tab-content {
+  padding-top: 20px;
+}
+
+.small-text {
+  font-size: 0.78rem;
+}
+
+.card-head-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.barre-recherche {
+  padding: 14px 20px 4px;
+
+  .recherche {
+    width: 100%;
+    max-width: 420px;
+  }
+}
+
+.ligne-cliquable {
+  cursor: pointer;
+
+  &:hover {
+    background: var(--mat-sys-surface-container-low);
+  }
+}

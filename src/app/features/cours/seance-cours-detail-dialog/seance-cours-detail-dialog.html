@@ -1,0 +1,18 @@
+<h2 mat-dialog-title>Séance — {{ data.seance.date }}</h2>
+
+<mat-dialog-content class="contenu">
+  <p class="muted">
+    {{ data.seance.heureDebut }} – {{ data.seance.heureFin }}
+    @if (data.seance.type) { · {{ data.seance.type }} }
+    @if (data.seance.salle) { · {{ data.seance.salle.libelle }} }
+  </p>
+  @if (data.seance.contenu) {
+    <p class="texte">{{ data.seance.contenu }}</p>
+  } @else {
+    <p class="muted">Aucun contenu renseigné pour cette séance.</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-flat-button color="primary" mat-dialog-close>Fermer</button>
+</mat-dialog-actions>

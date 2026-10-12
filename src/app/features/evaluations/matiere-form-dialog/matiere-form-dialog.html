@@ -1,0 +1,72 @@
+<div class="entete">
+  <mat-icon class="entete-icone">edit_note</mat-icon>
+  <div class="entete-texte">
+    <h2 mat-dialog-title>{{ data.matiere.intitule }}</h2>
+    <p class="entete-sous-titre">
+      {{ data.ueIntitule }} · {{ data.matiere.credits }} crédits
+    </p>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="soumettre()">
+  <mat-dialog-content class="contenu">
+    <div class="bloc-presence">
+      <span class="bloc-etiquette">Présence à l'évaluation</span>
+      <mat-button-toggle-group formControlName="presence" aria-label="Présence">
+        <mat-button-toggle [value]="true"><mat-icon>check</mat-icon> Présent</mat-button-toggle>
+        <mat-button-toggle [value]="false"><mat-icon>close</mat-icon> Absent</mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+
+    <div class="section">
+      <div class="section-titre">
+        <span>Notes</span>
+        @if (moyennePrevisionnelle() !== null) {
+          <span class="chip-moyenne" [class.positif]="moyennePrevisionnelle()! >= 10" [class.negatif]="moyennePrevisionnelle()! < 10">
+            <mat-icon>{{ moyennePrevisionnelle()! >= 10 ? 'trending_up' : 'trending_down' }}</mat-icon>
+            Moyenne prévisionnelle : {{ moyennePrevisionnelle() }} / 20
+          </span>
+        }
+      </div>
+      <div class="ligne-notes">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>CC</mat-label>
+          <input matInput type="number" min="0" max="20" step="0.25" formControlName="cc" placeholder="—" />
+          <span matSuffix class="poids-suffixe">/ 20 · 40%</span>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Examen</mat-label>
+          <input matInput type="number" min="0" max="20" step="0.25" formControlName="examen" placeholder="—" />
+          <span matSuffix class="poids-suffixe">/ 20 · 60%</span>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Rattrapage</mat-label>
+          <input matInput type="number" min="0" max="20" step="0.25" formControlName="rattrapage" placeholder="—" />
+          <span matSuffix class="poids-suffixe">/ 20 · 100%</span>
+        </mat-form-field>
+      </div>
+      <p class="aide">Un rattrapage saisi remplace entièrement la moyenne CC/Examen.</p>
+    </div>
+
+    <mat-form-field appearance="outline" class="champ-remarque">
+      <mat-label>Remarque</mat-label>
+      <mat-icon matPrefix>sticky_note_2</mat-icon>
+      <textarea matInput formControlName="remarque" rows="2" placeholder="Absence justifiée, dispense…"></textarea>
+    </mat-form-field>
+
+    @if (erreur()) {
+      <p class="erreur"><mat-icon>error_outline</mat-icon> {{ erreur() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="annuler()">Annuler</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="enCours()">
+      @if (enCours()) {
+        <mat-spinner diameter="20" />
+      } @else {
+        <ng-container><mat-icon>save</mat-icon> Enregistrer</ng-container>
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

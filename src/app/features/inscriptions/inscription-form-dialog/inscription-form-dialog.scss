@@ -1,0 +1,48 @@
+.contenu {
+  width: 100%;
+  max-height: 75vh;
+}
+
+.section-banner {
+  margin: 18px 0 12px;
+  padding: 8px 16px;
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: center;
+  border-radius: 6px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px 14px;
+}
+
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px 14px;
+}
+
+.spinner-row {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}
+
+.muted {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+@media (max-width: 640px) {
+  .form-grid,
+  .form-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}

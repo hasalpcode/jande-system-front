@@ -1,0 +1,430 @@
+// Include theming for Angular Material with `mat.theme()`.
+@use '@angular/material' as mat;
+
+html {
+  height: 100%;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$blue-palette,
+        tertiary: mat.$orange-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+
+  // Palette academique custom : bleu encre profond + accent ambre (diplome/sceau),
+  // en remplacement des tons Material par defaut generes ci-dessus. On ne redefinit
+  // que les tokens systeme (--mat-sys-*) reellement utilises par les composants et
+  // par nos propres pages, plutot que de regenerer des palettes M3 completes.
+  --mat-sys-primary: #1f3a63;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #dbe4f4;
+  --mat-sys-on-primary-container: #12274a;
+
+  --mat-sys-secondary: #4b5768;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: #e4e9f0;
+  --mat-sys-on-secondary-container: #2a3444;
+
+  --mat-sys-tertiary: #a9711c;
+  --mat-sys-on-tertiary: #ffffff;
+  --mat-sys-tertiary-container: #f6e6c8;
+  --mat-sys-on-tertiary-container: #4a3410;
+
+  --mat-sys-error: #b3261e;
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-error-container: #f9dedc;
+  --mat-sys-on-error-container: #410e0b;
+
+  --mat-sys-surface: #f7f6f2;
+  --mat-sys-surface-dim: #e8e6e0;
+  --mat-sys-surface-bright: #ffffff;
+  --mat-sys-surface-container-lowest: #ffffff;
+  --mat-sys-surface-container-low: #f3f1ec;
+  --mat-sys-surface-container: #eeece5;
+  --mat-sys-surface-container-high: #e8e5dd;
+  --mat-sys-surface-container-highest: #e2dfd6;
+  --mat-sys-on-surface: #1d2129;
+  --mat-sys-on-surface-variant: #565f6b;
+
+  --mat-sys-outline: #c8ccd2;
+  --mat-sys-outline-variant: #dee1e6;
+
+  // Tokens propres a l'app (pas du systeme Material) : reperes de design partages
+  // par toutes les pages de modules (voir shared/layout, shared/data-table).
+  --app-font-display: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+  --app-success: #2e7d4f;
+  --app-success-container: #dcf0e3;
+  --app-warning: #a9711c;
+  --app-warning-container: #f6e6c8;
+  --app-shadow-sm: 0 1px 2px rgba(29, 33, 41, 0.06), 0 1px 1px rgba(29, 33, 41, 0.04);
+
+  // Une teinte distincte par module, pour s'orienter par la couleur autant que par
+  // le texte (sidebar, tableau de bord). Meme famille de saturation/luminosite pour
+  // que ca reste un systeme coherent plutot qu'un arc-en-ciel.
+  --module-parametrage: #5e5ce6;
+  --module-parcours: #1d8a6e;
+  --module-inscriptions: #c1622b;
+  --module-paiements: #a9711c;
+  --module-cours: #2b6cb0;
+  --module-evaluations: #8e4585;
+  --module-documents: #6b4a2e;
+  --module-rh: #b23a5b;
+  --module-statistiques: #2a7f9e;
+  --module-badgeage: #1f8a8a;
+}
+
+body {
+  color-scheme: light;
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+  height: 100%;
+}
+
+// Le libellé flottant d'un mat-form-field n'a pas pointer-events: none par
+// defaut - avec un libelle assez long (ex. "Situation matrimoniale"), le texte
+// recouvre le declencheur d'un mat-select et bloque le clic reel de
+// l'utilisateur a cet endroit precis (l'ouverture ne marche qu'en cliquant a
+// cote du texte). Les libelles ne sont jamais des cibles interactives.
+.mdc-floating-label {
+  pointer-events: none !important;
+}
+
+h1, h2, h3 {
+  font-family: var(--app-font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+// Sert de repere visuel commun a toutes les pages de module (Parametrage, Parcours...) :
+// titre + sous-titre + zone d'actions, au-dessus d'un contenu en cartes.
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+
+  h1 {
+    font-size: 1.6rem;
+    margin: 0 0 4px;
+  }
+
+  p {
+    margin: 0;
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 0.95rem;
+  }
+}
+
+.page-header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.surface-card {
+  background: var(--mat-sys-surface-container-lowest);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  box-shadow: var(--app-shadow-sm);
+}
+
+.data-table-empty {
+  padding: 40px 24px;
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// Spinner CSS pur (pas de dependance a MatProgressSpinnerModule) pour remplacer
+// les etats "Chargement..." textuels, repetes dans toutes les pages de module.
+.loading-block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 44px 24px;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.9rem;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--mat-sys-outline-variant);
+  border-top-color: var(--mat-sys-primary);
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation-duration: 1.6s; }
+}
+
+// Legere entree en fondu pour les cartes de contenu au chargement d'une page.
+.surface-card {
+  animation: fade-in-up 0.18s ease-out;
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .surface-card { animation: none; }
+}
+
+// Table HTML nue plutot que mat-table : evite la ceremonie matColumnDef pour les
+// nombreuses listes de reference simples (2-5 colonnes) repetees dans les modules.
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+
+  th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    text-align: left;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--mat-sys-on-surface-variant);
+    font-weight: 600;
+    padding: 12px 16px;
+    background: var(--mat-sys-surface-container-lowest);
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+    color: var(--mat-sys-on-surface);
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr:hover {
+    background: var(--mat-sys-surface-container-low);
+  }
+
+  td.numeric {
+    font-variant-numeric: tabular-nums;
+  }
+
+  td.muted {
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+// Formulaire d'ajout rapide affiche en tete de card (plutot qu'un dialog modal)
+// pour les entites de reference a 2-4 champs, repete dans plusieurs modules.
+.inline-form {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 18px;
+  background: var(--mat-sys-surface-container-low);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  flex-wrap: wrap;
+
+  mat-form-field {
+    width: 220px;
+  }
+  mat-form-field.grow {
+    flex: 1;
+    min-width: 220px;
+  }
+  mat-form-field.small {
+    width: 130px;
+  }
+  button[type='submit'] {
+    margin-top: 4px;
+  }
+}
+
+.dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 380px;
+}
+
+.dialog-form .row {
+  display: flex;
+  gap: 12px;
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+.dialog-form .section-label {
+  margin: 10px 0 0;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.dialog-error {
+  color: var(--mat-sys-error);
+  font-size: 0.88rem;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+
+  &.chip-neutral {
+    background: var(--mat-sys-surface-container-high);
+    color: var(--mat-sys-on-surface-variant);
+  }
+  &.chip-success {
+    background: var(--app-success-container);
+    color: var(--app-success);
+  }
+  &.chip-warning {
+    background: var(--app-warning-container);
+    color: var(--app-warning);
+  }
+  &.chip-primary {
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+  }
+  &.chip-error {
+    background: var(--mat-sys-error-container);
+    color: var(--mat-sys-error);
+  }
+}
+
+// Icone teintee par module (fond clair + icone pleine couleur), reutilisee dans
+// le tableau de bord et la sidebar : voir --module-* dans :root ci-dessus.
+.tint-icon {
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+@each $module in parametrage, parcours, inscriptions, paiements, cours, evaluations, documents, rh, statistiques, badgeage {
+  // Seule, .tint-x ne teinte que le glyphe (nav de la sidebar, compacte).
+  .tint-#{$module} {
+    color: var(--module-#{$module});
+  }
+  // Combinee a .tint-icon, elle ajoute aussi le fond en pastille (cartes du
+  // tableau de bord, icones de stat-tile - plus d'espace, effet "app icon").
+  .tint-icon.tint-#{$module} {
+    background: color-mix(in srgb, var(--module-#{$module}) 16%, var(--mat-sys-surface-container-lowest));
+  }
+}
+
+// Grille de mini-tables (Parametrage, RH...) : plusieurs surface-card cote a cote.
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+
+  h3 {
+    margin: 0;
+    font-size: 0.98rem;
+    font-family: var(--app-font-display);
+  }
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.stat-tile {
+  background: var(--mat-sys-surface-container-lowest);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  padding: 16px 18px;
+  box-shadow: var(--app-shadow-sm);
+
+  .stat-value {
+    font-family: var(--app-font-display);
+    font-size: 1.7rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--mat-sys-on-surface);
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--mat-sys-on-surface-variant);
+    margin-top: 2px;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--mat-sys-outline-variant);
+  border-radius: 6px;
+}
+
+// Imprimer une page de l'app (ex. un bulletin) : la coquille (barre laterale,
+// titre de page, fil d'Ariane) n'a pas sa place sur le papier. Les pages qui
+// ont un contenu imprimable marquent le reste avec .no-print (voir Evaluations).
+@media print {
+  .sidebar {
+    display: none !important;
+  }
+  // .shell est une grille a 2 colonnes (barre laterale + contenu) : masquer la
+  // barre laterale sans repasser sur 1 colonne laisse .main se replacer dans la
+  // 1ere piste (264px) plutot que de s'etendre - tout le contenu imprime alors
+  // ecrase sur une bande etroite.
+  .shell {
+    display: block !important;
+  }
+  .main {
+    padding: 0 !important;
+  }
+  .page-header,
+  .no-print {
+    display: none !important;
+  }
+}

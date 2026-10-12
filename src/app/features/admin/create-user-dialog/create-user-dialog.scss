@@ -1,0 +1,67 @@
+.contenu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 420px;
+  max-height: 70vh;
+}
+
+.ligne {
+  display: flex;
+  gap: 12px;
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+.erreur {
+  color: var(--mat-sys-error);
+  font-size: 0.9rem;
+}
+
+.bloc-permissions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 8px;
+}
+
+.etiquette-bloc {
+  font-size: 0.75rem;
+  color: var(--mat-sys-on-surface-variant);
+  margin-bottom: 4px;
+}
+
+.module-permission {
+  padding: 2px 0;
+}
+
+.sous-permissions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0 6px 28px;
+
+  mat-checkbox {
+    font-size: 0.9rem;
+  }
+}
+
+.note-professeur {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -4px 0 4px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: var(--mat-sys-surface-container-low);
+  font-size: 0.85rem;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+}

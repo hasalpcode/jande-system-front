@@ -1,0 +1,52 @@
+<h2 mat-dialog-title>Ajouter un professeur</h2>
+
+<form [formGroup]="form" (ngSubmit)="soumettre()">
+  <mat-dialog-content class="contenu">
+    <div class="form-grid">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Code prof</mat-label>
+        <input matInput value="généré automatiquement" disabled />
+      </mat-form-field>
+      <div></div>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="small">
+        <mat-label>Civilité</mat-label>
+        <mat-select formControlName="civilite">@for (c of civilites; track c) { <mat-option [value]="c">{{ c }}</mat-option> }</mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="small">
+        <mat-label>Sexe</mat-label>
+        <mat-select formControlName="sexe">@for (s of sexes; track s) { <mat-option [value]="s">{{ s }}</mat-option> }</mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="small">
+        <mat-label>Situation</mat-label>
+        <mat-select formControlName="situationMatrimoniale">@for (s of situationsMatrimoniales; track s) { <mat-option [value]="s">{{ s }}</mat-option> }</mat-select>
+      </mat-form-field>
+      <div></div>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Nom</mat-label><input matInput formControlName="nom" /></mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Prénom</mat-label><input matInput formControlName="prenom" /></mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Titre</mat-label><input matInput formControlName="titre" /></mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Nationalité</mat-label>
+        <mat-select formControlName="nationaliteCode">@for (n of data.nationalites; track n.code) { <mat-option [value]="n.code">{{ n.libelle }}</mat-option> }</mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Spécialité</mat-label><input matInput formControlName="specialite" /></mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Adresse</mat-label><input matInput formControlName="adresse" /></mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Téléphone</mat-label><input matInput formControlName="telephone" /></mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic"><mat-label>Email</mat-label><input matInput type="email" formControlName="email" /></mat-form-field>
+    </div>
+
+    @if (erreur()) {
+      <p class="erreur">{{ erreur() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="annuler()">Annuler</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="enCours()">
+      @if (enCours()) {
+        <mat-spinner diameter="20" />
+      } @else {
+        Ajouter
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

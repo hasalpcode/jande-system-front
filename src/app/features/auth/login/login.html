@@ -1,0 +1,83 @@
+<div class="page">
+  <div class="vitrine">
+    <div class="vitrine-contenu">
+      <div class="marque">
+        <mat-icon class="marque-icone">school</mat-icon>
+      </div>
+      <h1>Gestion d'établissement scolaire</h1>
+      <p class="slogan">Gérer facilement votre établissement, partout et n'importe quand.</p>
+      <ul class="atouts">
+        <li><mat-icon>check_circle</mat-icon> Inscriptions, paiements et notes centralisés</li>
+        <li><mat-icon>check_circle</mat-icon> Un accès pensé pour chaque profil : admin, professeur, comptable…</li>
+        <li><mat-icon>check_circle</mat-icon> Accessible depuis n'importe quel appareil</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="volet-connexion">
+    <mat-card class="carte">
+      <mat-card-header>
+        <mat-card-title>Connexion</mat-card-title>
+        <mat-card-subtitle>
+          {{ mode() === 'SUPER_ADMIN' ? 'Espace super administrateur' : 'Accédez à l\'espace de votre établissement' }}
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (superAdminAccessible()) {
+          <mat-button-toggle-group
+            class="toggle-mode"
+            [value]="mode()"
+            (change)="basculerMode($event.value)"
+          >
+            <mat-button-toggle value="ETABLISSEMENT">Établissement</mat-button-toggle>
+            <mat-button-toggle value="SUPER_ADMIN">Super Admin</mat-button-toggle>
+          </mat-button-toggle-group>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="soumettre()" class="formulaire">
+          @if (mode() === 'ETABLISSEMENT') {
+            <mat-form-field appearance="outline">
+              <mat-label>Code établissement</mat-label>
+              <input matInput formControlName="codeEtablissement" autocomplete="off" />
+              @if (form.controls.codeEtablissement.hasError('required')) {
+                <mat-error>Le code établissement est requis</mat-error>
+              }
+            </mat-form-field>
+          }
+
+          <mat-form-field appearance="outline">
+            <mat-label>Email</mat-label>
+            <input matInput type="email" formControlName="email" autocomplete="username" />
+            @if (form.controls.email.hasError('required')) {
+              <mat-error>L'email est requis</mat-error>
+            }
+            @if (form.controls.email.hasError('email')) {
+              <mat-error>Email invalide</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Mot de passe</mat-label>
+            <input matInput type="password" formControlName="password" autocomplete="current-password" />
+            @if (form.controls.password.hasError('required')) {
+              <mat-error>Le mot de passe est requis</mat-error>
+            }
+          </mat-form-field>
+
+          @if (erreur()) {
+            <p class="erreur">{{ erreur() }}</p>
+          }
+
+          <button mat-flat-button color="primary" type="submit" [disabled]="enCours()" class="bouton-soumettre">
+            @if (enCours()) {
+              <mat-spinner diameter="20" />
+            } @else {
+              Se connecter
+            }
+          </button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

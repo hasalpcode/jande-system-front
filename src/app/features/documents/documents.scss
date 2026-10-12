@@ -1,0 +1,32 @@
+.tab-content {
+  padding-top: 20px;
+}
+
+// Pleine largeur sur sa propre ligne plutot que partage avec En-tete - un
+// textarea multi-lignes serait trop etroit cote a cote avec les autres champs.
+.champ-contenu {
+  flex-basis: 100%;
+}
+
+// Rappel visuel entre les deux sections editables : la section "informations
+// etudiant" n'a pas de champ ici, elle est toujours regeneree depuis le
+// systeme (voir DocumentPdfRenderer) plutot que saisie dans le template.
+.section-etudiant-apercu {
+  flex-basis: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px dashed var(--mat-sys-outline-variant);
+  border-radius: 8px;
+  background: var(--mat-sys-surface-variant);
+
+  mat-icon {
+    color: var(--mat-sys-on-surface-variant);
+    margin-top: 2px;
+  }
+
+  p {
+    margin: 2px 0 0;
+  }
+}

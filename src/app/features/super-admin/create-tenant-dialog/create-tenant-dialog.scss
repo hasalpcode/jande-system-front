@@ -1,0 +1,28 @@
+.contenu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 380px;
+}
+
+.ligne {
+  display: flex;
+  gap: 12px;
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+.section-titre {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.erreur {
+  color: var(--mat-sys-error);
+  font-size: 0.9rem;
+}

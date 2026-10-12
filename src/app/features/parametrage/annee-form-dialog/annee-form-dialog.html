@@ -1,0 +1,35 @@
+<h2 mat-dialog-title>{{ enEdition ? "Modifier l'année académique" : 'Ajouter une année académique' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="soumettre()">
+  <mat-dialog-content class="contenu">
+    <mat-form-field appearance="outline">
+      <mat-label>Libellé</mat-label>
+      <input matInput formControlName="libelle" placeholder="2026-2027" />
+    </mat-form-field>
+    <div class="ligne">
+      <mat-form-field appearance="outline">
+        <mat-label>Début</mat-label>
+        <input matInput type="date" formControlName="dateDebut" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Fin</mat-label>
+        <input matInput type="date" formControlName="dateFin" />
+      </mat-form-field>
+    </div>
+
+    @if (erreur()) {
+      <p class="erreur">{{ erreur() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="annuler()">Annuler</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="enCours()">
+      @if (enCours()) {
+        <mat-spinner diameter="20" />
+      } @else {
+        {{ enEdition ? 'Enregistrer' : 'Ajouter' }}
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

@@ -1,0 +1,173 @@
+<div class="page-header">
+  <div>
+    <h1>Inscriptions</h1>
+    <p>Admission des candidats, dossiers étudiants, inscriptions annuelles.</p>
+  </div>
+</div>
+
+<mat-tab-group animationDuration="120ms">
+  <mat-tab label="Admissions">
+    <div class="tab-content">
+      <div class="surface-card">
+        <div class="card-head">
+          <h3>Liste des étudiants</h3>
+          <div class="card-head-actions">
+            <button mat-flat-button color="primary" (click)="ouvrirAjoutCandidat()">
+              <mat-icon>add</mat-icon> Ajouter
+            </button>
+            <button mat-stroked-button (click)="exporterEtudiants()">
+              <mat-icon>file_download</mat-icon> Export (Excel)
+            </button>
+          </div>
+        </div>
+        <div class="barre-recherche">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="recherche">
+            <mat-icon matPrefix>search</mat-icon>
+            <input
+              matInput
+              placeholder="Rechercher par matricule, nom, prénom…"
+              [ngModel]="rechercheEtudiant()"
+              (ngModelChange)="rechercheEtudiant.set($event)"
+            />
+            @if (rechercheEtudiant()) {
+              <button matSuffix mat-icon-button (click)="rechercheEtudiant.set('')" aria-label="Effacer">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </mat-form-field>
+        </div>
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>Matricule</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Téléphone</th>
+                <th>Date naissance</th>
+                <th>Lieu de naissance</th>
+                <th>Genre</th>
+                <th>Disponibilité</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of etudiantsFiltres(); track e.id) {
+                <tr class="ligne-cliquable" (click)="ouvrirFicheEtudiant(e)">
+                  <td><code>{{ e.matricule }}</code></td>
+                  <td>{{ e.nom }}</td>
+                  <td>{{ e.prenom }}</td>
+                  <td class="muted">{{ e.contact || '—' }}</td>
+                  <td class="muted">{{ e.dateNaissance || '—' }}</td>
+                  <td class="muted">{{ e.lieuNaissance || '—' }}</td>
+                  <td class="muted">{{ e.sexe || '—' }}</td>
+                  <td class="muted">{{ e.disponibilite?.periode || '—' }}</td>
+                  <td>
+                    <button mat-icon-button (click)="$event.stopPropagation(); ouvrirFicheEtudiant(e)" matTooltip="Voir la fiche">
+                      <mat-icon>badge</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="$event.stopPropagation(); imprimerCarteEtudiant(e)" matTooltip="Carte étudiante">
+                      <mat-icon>credit_card</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="$event.stopPropagation(); ouvrirEditionEtudiant(e)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button (click)="$event.stopPropagation(); supprimerEtudiant(e)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td colspan="9" class="muted">{{ rechercheEtudiant() ? 'Aucun étudiant ne correspond à cette recherche.' : 'Aucun étudiant admis pour l\'instant.' }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Inscriptions">
+    <div class="tab-content surface-card">
+      <div class="card-head"><h3>Liste des Inscriptions</h3></div>
+
+      <div class="inline-form" style="padding: 0 18px 12px;">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Matricule</mat-label>
+          <input matInput [value]="rechercheMatricule()" (input)="rechercheMatricule.set($any($event.target).value)" />
+        </mat-form-field>
+        <button mat-flat-button type="button">Rechercher</button>
+        <span style="flex: 1;"></span>
+        <button mat-flat-button color="primary" (click)="ouvrirAjoutInscription()">
+          <mat-icon>add</mat-icon> Ajouter
+        </button>
+      </div>
+
+      <div class="table-scroll">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>N° Inscription</th>
+              <th>Année Scolaire</th>
+              <th>Nom</th>
+              <th>Prénom</th>
+              <th>Classe</th>
+              <th>Date d'inscription</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (i of inscriptionsFiltrees(); track i.id) {
+              <tr>
+                <td class="muted">{{ i.numero }}</td>
+                <td class="muted">{{ i.anneeAcademique?.libelle || '—' }}</td>
+                <td>{{ i.etudiant?.nom || '—' }}</td>
+                <td>{{ i.etudiant?.prenom || '—' }}</td>
+                <td class="muted">{{ i.classe?.libelle || '—' }}</td>
+                <td class="muted">{{ i.dateInscription }}</td>
+                <td>
+                  @if (i.etudiant) {
+                    <button mat-icon-button (click)="ouvrirFicheEtudiant(i.etudiant)" matTooltip="Voir la fiche"><mat-icon>badge</mat-icon></button>
+                    <button mat-icon-button (click)="imprimerCarteEtudiant(i.etudiant, classeDeInscription(i), i.id)" matTooltip="Carte étudiante">
+                      <mat-icon>credit_card</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="ouvrirEditionEtudiant(i.etudiant)" matTooltip="Modifier l'étudiant">
+                      <mat-icon>person</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="imprimerFicheInscription(i)" matTooltip="Imprimer la fiche d'inscription">
+                      <mat-icon>fact_check</mat-icon>
+                    </button>
+                  }
+                  <button mat-icon-button (click)="ouvrirEditionInscription(i)" matTooltip="Modifier l'inscription">
+                    <mat-icon>assignment</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="supprimerInscription(i)" matTooltip="Supprimer l'inscription"><mat-icon>delete</mat-icon></button>
+                  <button mat-icon-button (click)="genererCertificat(i)" matTooltip="Imprimer le certificat d'inscription">
+                    <mat-icon>print</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="7" class="muted">Aucune inscription.</td></tr> }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Étudiants non inscrits">
+    <div class="tab-content surface-card">
+      <div class="card-head"><h3>Étudiants non inscrits ({{ etudiantsNonInscrits().length }})</h3></div>
+      <div class="table-scroll">
+        <table class="styled-table">
+          <thead><tr><th>Matricule</th><th>Nom</th><th>Prénom</th><th>Action</th></tr></thead>
+          <tbody>
+            @for (e of etudiantsNonInscrits(); track e.id) {
+              <tr>
+                <td class="muted">{{ e.matricule }}</td>
+                <td>{{ e.nom }}</td>
+                <td>{{ e.prenom }}</td>
+                <td><button mat-button color="primary" (click)="inscrireEtudiant(e)">Inscrire</button></td>
+              </tr>
+            } @empty { <tr><td colspan="4" class="muted">Tous les étudiants sont inscrits.</td></tr> }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </mat-tab>
+</mat-tab-group>

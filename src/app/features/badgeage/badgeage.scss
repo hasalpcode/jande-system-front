@@ -1,0 +1,63 @@
+.titre-icone {
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+.status-chip.petit {
+  padding: 1px 8px;
+  font-size: 0.68rem;
+}
+
+.avatar-initiale {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--module-badgeage) 16%, var(--mat-sys-surface-container-lowest));
+  color: var(--module-badgeage);
+  font-size: 1rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.resultat-badge {
+  margin: 0 18px 18px;
+  padding: 16px 18px;
+  border-radius: 10px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  background: var(--mat-sys-surface-container-low);
+
+  &.alerte {
+    border-color: var(--mat-sys-error);
+  }
+}
+
+.resultat-identite {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.resultat-nom {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.resultat-heure {
+  margin-left: auto;
+  font-size: 0.8rem;
+}
+
+.resultat-puces {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.small-text {
+  font-size: 0.78rem;
+}

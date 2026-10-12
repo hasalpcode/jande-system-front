@@ -1,0 +1,204 @@
+<h2 mat-dialog-title>Nouveau candidat</h2>
+
+<form [formGroup]="form" (ngSubmit)="soumettre()">
+  <mat-dialog-content class="contenu">
+    <div class="section-banner">État civil</div>
+    <div class="form-grid">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Numéro d'identité</mat-label>
+        <input matInput formControlName="numeroIdentite" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="small">
+        <mat-label>Civilité</mat-label>
+        <mat-select formControlName="civilite">
+          @for (c of civilites; track c) { <mat-option [value]="c">{{ c }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="small">
+        <mat-label>Sexe</mat-label>
+        <mat-select formControlName="sexe">
+          @for (s of sexes; track s) { <mat-option [value]="s">{{ s }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <div class="file-field">
+        <label>Profil</label>
+        @if (photo(); as src) {
+          <div class="apercu-photo-ligne">
+            <img [src]="src" alt="Photo" class="apercu-photo" />
+            <button mat-icon-button type="button" (click)="retirerPhoto()" matTooltip="Retirer"><mat-icon>close</mat-icon></button>
+          </div>
+        } @else {
+          <input type="file" accept="image/*" (change)="selectionnerPhoto($event)" />
+        }
+      </div>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Situation matrimoniale</mat-label>
+        <mat-select formControlName="situationMatrimoniale">
+          @for (s of situationsMatrimoniales; track s) { <mat-option [value]="s">{{ s }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Nom</mat-label>
+        <input matInput formControlName="nom" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Prénom</mat-label>
+        <input matInput formControlName="prenom" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Date de naissance</mat-label>
+        <input matInput type="date" formControlName="dateNaissance" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Lieu de naissance</mat-label>
+        <input matInput formControlName="lieuNaissance" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Nationalité</mat-label>
+        <mat-select formControlName="nationaliteCode">
+          @for (n of data.nationalites; track n.code) { <mat-option [value]="n.code">{{ n.libelle }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="section-banner">Contacts</div>
+    <div class="form-grid">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wide">
+        <mat-label>Adresse</mat-label>
+        <input matInput formControlName="adresse" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Téléphone 1</mat-label>
+        <input matInput formControlName="contact" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Téléphone 2</mat-label>
+        <input matInput formControlName="telephone2" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Réseau social</mat-label>
+        <input matInput formControlName="reseauSocial" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Site web</mat-label>
+        <input matInput formControlName="siteWeb" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wide">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" />
+      </mat-form-field>
+    </div>
+
+    <div class="section-banner">Info. professionnelles</div>
+    <div class="form-grid">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Société</mat-label>
+        <input matInput formControlName="proSociete" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Téléphone bureau</mat-label>
+        <input matInput formControlName="proTelephoneBureau" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Profession</mat-label>
+        <input matInput formControlName="proProfession" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Fonction</mat-label>
+        <input matInput formControlName="proFonction" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wide">
+        <mat-label>Adresse société</mat-label>
+        <input matInput formControlName="proAdresseSociete" />
+      </mat-form-field>
+    </div>
+
+    <div class="section-banner">Info. cursus</div>
+    <div class="form-grid">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Dernier établissement</mat-label>
+        <input matInput formControlName="cursusDernierEtablissement" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Niveau d'étude</mat-label>
+        <input matInput formControlName="cursusNiveauEtude" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="small">
+        <mat-label>Année</mat-label>
+        <input matInput formControlName="cursusAnnee" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Diplôme / titre</mat-label>
+        <input matInput formControlName="cursusDiplomeTitre" />
+      </mat-form-field>
+    </div>
+
+    <div class="section-banner">Autres infos</div>
+    <div class="form-grid">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wide">
+        <mat-label>Maladies / allergies</mat-label>
+        <input matInput formControlName="maladies" />
+      </mat-form-field>
+    </div>
+    <div formArrayName="tuteurs" class="tuteurs-list">
+      @for (ligne of tuteursFormArray.controls; track $index; let i = $index) {
+        <div [formGroupName]="i" class="tuteur-row">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grow">
+            <mat-label>Nom tuteur (ex. Père, Mère…)</mat-label>
+            <input matInput formControlName="nom" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Tél. tuteur</mat-label>
+            <input matInput formControlName="telephone" />
+          </mat-form-field>
+          <button mat-icon-button type="button" (click)="retirerTuteur(i)" [disabled]="tuteursFormArray.length === 1">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </div>
+      }
+      <button mat-button type="button" (click)="ajouterTuteur()">
+        <mat-icon>add</mat-icon>
+        Ajouter un tuteur
+      </button>
+    </div>
+    <div class="form-grid">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="small">
+        <mat-label>Disponibilité</mat-label>
+        <mat-select formControlName="dispoPeriode">
+          @for (p of periodesDisponibilite; track p) { <mat-option [value]="p">{{ p }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Heure début</mat-label>
+        <input matInput type="time" formControlName="dispoHeureDebut" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Heure fin</mat-label>
+        <input matInput type="time" formControlName="dispoHeureFin" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wide">
+        <mat-label>Frais préinscription</mat-label>
+        <input matInput formControlName="fraisPreinscription" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="wide">
+        <mat-label>Observations</mat-label>
+        <textarea matInput formControlName="observation" rows="2"></textarea>
+      </mat-form-field>
+    </div>
+
+    @if (erreur()) {
+      <p class="erreur">{{ erreur() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="annuler()">Annuler</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="enCours()">
+      @if (enCours()) {
+        <mat-spinner diameter="20" />
+      } @else {
+        Soumettre le formulaire
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

@@ -1,0 +1,597 @@
+<div class="page-header">
+  <div>
+    <h1>Évaluations</h1>
+    <p>Notes et bulletins — la moyenne et les crédits validés sont calculés, jamais saisis.</p>
+  </div>
+</div>
+
+<nav class="fil-ariane no-print">
+  <a (click)="retourClasses()" [class.actif]="vue() === 'classes'">
+    <mat-icon>school</mat-icon>
+    Classes
+  </a>
+  @if (classeSelectionnee()) {
+    <span class="separateur">›</span>
+    <a (click)="retourEtudiants()" [class.actif]="vue() === 'etudiants'">{{ classeSelectionnee()!.libelle }}</a>
+  }
+  @if (etudiantSelectionne()) {
+    <span class="separateur">›</span>
+    <a (click)="retourBulletins()" [class.actif]="vue() === 'bulletins'">{{ etudiantSelectionne()!.prenom }} {{ etudiantSelectionne()!.nom }}</a>
+  }
+  @if (conseilClasse()) {
+    <span class="separateur">›</span>
+    <a (click)="allerConseil()" [class.actif]="vue() === 'conseil'">Conseil de classe — {{ conseilClasse()!.libelle }}</a>
+  }
+  @if (saisieClasse()) {
+    <span class="separateur">›</span>
+    <span class="actif">Saisie des notes — {{ saisieClasse()!.libelle }}</span>
+  }
+  @if (vue() === 'bulletin' && bulletinCourant()) {
+    <span class="separateur">›</span>
+    <span class="actif">Bulletin — {{ bulletinCourant()!.bulletin.semestreLibelle }}</span>
+  }
+</nav>
+
+@if (vue() === 'classes') {
+  <div class="grille-classes">
+    @for (c of classes(); track c.id) {
+      <div class="carte-classe-wrapper">
+        <button type="button" class="carte-classe" (click)="ouvrirClasse(c)">
+          <mat-icon class="tint-icon tint-evaluations carte-classe-icone">school</mat-icon>
+          <div class="carte-classe-corps">
+            <div class="carte-classe-titre">{{ c.libelle }}</div>
+            <div class="carte-classe-sous">{{ c.filiereLibelle || '—' }} · {{ c.mentionLibelle || '—' }}</div>
+            @if (c.domaineLibelle) { <div class="carte-classe-domaine muted">{{ c.domaineLibelle }}</div> }
+          </div>
+          <span class="carte-classe-annee">{{ c.anneeAcademiqueLibelle || '—' }}</span>
+          <mat-icon class="carte-classe-chevron">chevron_right</mat-icon>
+        </button>
+        <button
+          type="button"
+          class="carte-classe-conseil"
+          matTooltip="Conseil de classe"
+          (click)="ouvrirConseilClasse(c); $event.stopPropagation()"
+        >
+          <mat-icon>groups</mat-icon>
+        </button>
+        <button
+          type="button"
+          class="carte-classe-conseil"
+          matTooltip="Saisie des notes par classe"
+          (click)="ouvrirSaisieClasse(c); $event.stopPropagation()"
+        >
+          <mat-icon>edit_note</mat-icon>
+        </button>
+      </div>
+    } @empty {
+      <p class="muted">Aucune classe configurée.</p>
+    }
+  </div>
+}
+
+@if (vue() === 'etudiants' && classeSelectionnee()) {
+  <div class="surface-card">
+    <div class="card-head">
+      <h3>Étudiants — {{ classeSelectionnee()!.libelle }}</h3>
+    </div>
+    <div class="barre-recherche">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="recherche">
+        <mat-icon matPrefix>search</mat-icon>
+        <input
+          matInput
+          placeholder="Rechercher par nom, prénom ou matricule…"
+          [ngModel]="rechercheEtudiant()"
+          (ngModelChange)="rechercheEtudiant.set($event)"
+        />
+        @if (rechercheEtudiant()) {
+          <button matSuffix mat-icon-button (click)="rechercheEtudiant.set('')" aria-label="Effacer">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </mat-form-field>
+    </div>
+    <div class="table-scroll">
+      <table class="styled-table">
+        <thead><tr><th>Matricule</th><th>Nom</th><th>Sexe</th><th></th></tr></thead>
+        <tbody>
+          @for (e of etudiantsFiltres(); track e.id) {
+            <tr class="ligne-cliquable" (click)="ouvrirEtudiant(e)">
+              <td><code>{{ e.matricule }}</code></td>
+              <td>
+                <span class="avatar-initiale">{{ e.prenom.charAt(0) }}{{ e.nom.charAt(0) }}</span>
+                {{ e.prenom }} {{ e.nom }}
+              </td>
+              <td class="muted">{{ e.sexe || '—' }}</td>
+              <td><mat-icon>chevron_right</mat-icon></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4" class="muted">{{ rechercheEtudiant() ? 'Aucun étudiant ne correspond à cette recherche.' : 'Aucun étudiant inscrit dans cette classe.' }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+
+@if (vue() === 'conseil' && conseilClasse(); as classeConseil) {
+  @if (!conseilSemestreId()) {
+    <div class="surface-card">
+      <div class="card-head">
+        <h3><mat-icon class="titre-icone">groups</mat-icon> Conseil de classe — {{ classeConseil.libelle }}</h3>
+      </div>
+      <form [formGroup]="formConseil" (ngSubmit)="voirConseil()" class="inline-form">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grow">
+          <mat-label>Semestre</mat-label>
+          <mat-select formControlName="semestreId">
+            @for (s of semestresDeLaClasseConseil(); track s.id) { <mat-option [value]="s.id">{{ s.libelle }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="submit">Voir le bilan</button>
+      </form>
+    </div>
+  } @else {
+    <div class="surface-card">
+      <div class="card-head">
+        <h3><mat-icon class="titre-icone">groups</mat-icon> Conseil de classe — {{ classeConseil.libelle }} · {{ semestreConseilLibelle() }}</h3>
+        <div class="card-head-actions no-print">
+          <button mat-stroked-button (click)="imprimerConseil()"><mat-icon>print</mat-icon> Imprimer</button>
+          <button mat-button (click)="changerSemestreConseil()">Changer de semestre</button>
+        </div>
+      </div>
+      @if (chargementConseil()) {
+        <div class="spinner-row"><mat-spinner diameter="28" /></div>
+      } @else {
+        <div class="grille-stats-conseil">
+          <div class="stat-tile">
+            <div class="stat-value">{{ conseilBulletins().length }}</div>
+            <div class="stat-label">Bulletins établis</div>
+          </div>
+          @if (moyenneConseil() !== null) {
+            <div class="stat-tile">
+              <div class="stat-value">{{ moyenneConseil() }} / 20</div>
+              <div class="stat-label">Moyenne de la classe</div>
+            </div>
+            <div class="stat-tile">
+              <div class="stat-value">{{ tauxReussiteConseil() }} %</div>
+              <div class="stat-label">Taux de réussite</div>
+            </div>
+          }
+        </div>
+        @if (conseilDetail(); as detail) {
+          <div class="table-scroll">
+            <table class="styled-table conseil-combine">
+              <thead>
+                <tr>
+                  <th rowspan="2">Étudiant</th>
+                  <th rowspan="2">Matricule</th>
+                  @for (ue of detail.unitesEnseignement; track ue.id; let ueIndex = $index) {
+                    <th [attr.colspan]="ue.elementsConstitutifs.length + 1" [class]="'separation-ue ue-tinte-' + (ueIndex % 6)">
+                      {{ ue.intitule }}
+                    </th>
+                  }
+                </tr>
+                <tr>
+                  @for (ue of detail.unitesEnseignement; track ue.id; let ueIndex = $index) {
+                    @for (ec of ue.elementsConstitutifs; track ec.id) {
+                      <th [class]="'numeric ue-tinte-' + (ueIndex % 6)">{{ ec.intitule }}</th>
+                    }
+                    <th [class]="'ue-tinte-' + (ueIndex % 6)">Statut</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (ligne of lignesConseilCombinees(); track ligne.etudiantId) {
+                  <tr>
+                    <td>{{ ligne.nomComplet }}</td>
+                    <td><code>{{ ligne.matricule }}</code></td>
+                    @for (ue of ligne.parUe; track $index) {
+                      @for (moyenne of ue.moyennesParEc; track $index) {
+                        <td class="numeric">{{ moyenne !== null ? moyenne : '—' }}</td>
+                      }
+                      <td>
+                        @if (ue.moyenneUe !== null) {
+                          <span class="status-chip petit" [class.chip-success]="ue.valide" [class.chip-error]="!ue.valide">
+                            {{ ue.valide ? 'Validé' : 'Non validé' }}
+                          </span>
+                        } @else {
+                          <span class="muted">—</span>
+                        }
+                      </td>
+                    }
+                  </tr>
+                } @empty {
+                  <tr><td colspan="2" class="muted">Aucun bulletin établi pour ce semestre.</td></tr>
+                }
+              </tbody>
+              @if (lignesConseilCombinees().length) {
+                <tfoot>
+                  <tr>
+                    <td colspan="2" class="total-label">Moyenne de la classe</td>
+                    @for (moyennesUe of moyennesClasseParUe(); track $index) {
+                      @for (moyenne of moyennesUe; track $index) {
+                        <td class="numeric total-value">{{ moyenne !== null ? moyenne : '—' }}</td>
+                      }
+                      <td></td>
+                    }
+                  </tr>
+                </tfoot>
+              }
+            </table>
+          </div>
+        }
+      }
+    </div>
+  }
+}
+
+@if (vue() === 'saisie' && saisieClasse(); as classeSaisie) {
+  @if (!saisieSemestreId()) {
+    <div class="surface-card">
+      <div class="card-head">
+        <h3><mat-icon class="titre-icone">edit_note</mat-icon> Saisie des notes — {{ classeSaisie.libelle }}</h3>
+        <button mat-button (click)="retourClassesDepuisSaisie()"><mat-icon>arrow_back</mat-icon> Classes</button>
+      </div>
+      <form [formGroup]="formSaisieSemestre" (ngSubmit)="choisirSemestreSaisie()" class="inline-form">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grow">
+          <mat-label>Semestre</mat-label>
+          <mat-select formControlName="semestreId">
+            @for (s of semestresDeLaClasseSaisie(); track s.id) { <mat-option [value]="s.id">{{ s.libelle }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="submit">Continuer</button>
+      </form>
+    </div>
+  } @else if (!saisieElementConstitutifId()) {
+    <div class="surface-card">
+      <div class="card-head">
+        <h3><mat-icon class="titre-icone">edit_note</mat-icon> Saisie des notes — {{ classeSaisie.libelle }}</h3>
+        <button mat-button (click)="changerSemestreSaisie()"><mat-icon>arrow_back</mat-icon> Changer de semestre</button>
+      </div>
+      @if (chargementCurriculumSaisie()) {
+        <div class="spinner-row"><mat-spinner diameter="28" /></div>
+      } @else {
+        <form [formGroup]="formSaisieEc" (ngSubmit)="choisirEcSaisie()" class="inline-form">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grow">
+            <mat-label>Élément constitutif (EC)</mat-label>
+            <mat-select formControlName="elementConstitutifId">
+              @for (ue of curriculumSaisie(); track ue.ueId) {
+                <mat-optgroup [label]="ue.ueIntitule">
+                  @for (ec of ue.elementsConstitutifs; track ec.id) { <mat-option [value]="ec.id">{{ ec.intitule }}</mat-option> }
+                </mat-optgroup>
+              }
+            </mat-select>
+          </mat-form-field>
+          <button mat-flat-button color="primary" type="submit">Continuer</button>
+        </form>
+      }
+    </div>
+  } @else {
+    <div class="surface-card">
+      <div class="card-head">
+        <h3>
+          <mat-icon class="titre-icone">edit_note</mat-icon>
+          {{ classeSaisie.libelle }} · {{ ecChoisiSaisie()?.ueIntitule }} — {{ ecChoisiSaisie()?.intitule }}
+        </h3>
+        <button mat-button (click)="changerEcSaisie()"><mat-icon>arrow_back</mat-icon> Changer d'EC</button>
+      </div>
+
+      <div class="inline-form" style="padding: 0 18px 12px;">
+        <button mat-stroked-button type="button" (click)="telechargerModeleNotes()">
+          <mat-icon>download</mat-icon> Télécharger (Excel)
+        </button>
+        <button mat-stroked-button type="button" (click)="champFichierImport.click()" [disabled]="importEnCoursSaisie()">
+          @if (importEnCoursSaisie()) {
+            <mat-spinner diameter="18" />
+          } @else {
+            <mat-icon>upload</mat-icon>
+          }
+          Importer (Excel)
+        </button>
+        <input #champFichierImport type="file" accept=".xlsx,.xls" hidden (change)="importerNotes($event)" />
+        <span style="flex: 1;"></span>
+        <button mat-flat-button color="primary" type="button" (click)="enregistrerGrilleSaisie()" [disabled]="enregistrementGrilleSaisie()">
+          @if (enregistrementGrilleSaisie()) {
+            <mat-spinner diameter="18" />
+          } @else {
+            <mat-icon>save</mat-icon>
+          }
+          Enregistrer
+        </button>
+      </div>
+
+      @if (chargementGrilleSaisie()) {
+        <div class="spinner-row"><mat-spinner diameter="28" /></div>
+      } @else {
+        <form [formGroup]="formGrilleSaisie">
+          <div class="table-scroll" formArrayName="lignes">
+            <table class="styled-table">
+              <thead>
+                <tr>
+                  <th>Étudiant</th>
+                  <th>Matricule</th>
+                  <th class="numeric">CC</th>
+                  <th class="numeric">Examen</th>
+                  <th class="numeric">Rattrapage</th>
+                  <th>Présence</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (ligne of lignesSaisie.controls; track $index; let i = $index) {
+                  <tr [formGroupName]="i">
+                    <td>{{ ligne.controls.nomComplet.value }}</td>
+                    <td><code>{{ ligne.controls.matricule.value }}</code></td>
+                    <td class="numeric">
+                      <input type="number" min="0" max="20" step="0.25" class="note-input" formControlName="cc" />
+                    </td>
+                    <td class="numeric">
+                      <input type="number" min="0" max="20" step="0.25" class="note-input" formControlName="examen" />
+                    </td>
+                    <td class="numeric">
+                      <input type="number" min="0" max="20" step="0.25" class="note-input" formControlName="rattrapage" />
+                    </td>
+                    <td><input type="checkbox" formControlName="presence" /></td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="6" class="muted">Aucun étudiant dans cette classe.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </form>
+      }
+    </div>
+  }
+}
+
+@if (vue() === 'bulletins' && etudiantSelectionne()) {
+  <div class="surface-card">
+    <div class="card-head">
+      <h3>Bulletins — {{ etudiantSelectionne()!.prenom }} {{ etudiantSelectionne()!.nom }}</h3>
+      <button mat-icon-button (click)="panneauNouveauBulletin.set(!panneauNouveauBulletin())">
+        <mat-icon>{{ panneauNouveauBulletin() ? 'close' : 'add' }}</mat-icon>
+      </button>
+    </div>
+    @if (panneauNouveauBulletin()) {
+      <form [formGroup]="formBulletin" (ngSubmit)="creerBulletin()" class="inline-form">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grow">
+          <mat-label>Semestre</mat-label>
+          <mat-select formControlName="semestreId">
+            @for (s of semestresDeLaClasse(); track s.id) { <mat-option [value]="s.id">{{ s.libelle }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="submit">Ajouter un bulletin</button>
+      </form>
+    }
+    <div class="table-scroll">
+      <table class="styled-table">
+        <thead><tr><th>Semestre</th><th>Année</th><th>Moyenne générale</th><th>Crédits validés</th><th></th></tr></thead>
+        <tbody>
+          @for (b of bulletins(); track b.id) {
+            <tr class="ligne-cliquable" (click)="ouvrirBulletin(b)">
+              <td>{{ b.semestreLibelle }}</td>
+              <td class="muted">{{ b.anneeAcademiqueLibelle }}</td>
+              <td class="numeric">
+                <strong>{{ b.moyenneGenerale }}</strong> / 20
+                <span class="status-chip petit" [class.chip-success]="b.semestreValide" [class.chip-error]="!b.semestreValide">
+                  {{ b.semestreValide ? 'Validé' : 'Non validé' }}
+                </span>
+              </td>
+              <td class="numeric">{{ b.creditsValides }} / {{ b.creditsTotal }}</td>
+              <td><mat-icon>chevron_right</mat-icon></td>
+            </tr>
+          } @empty { <tr><td colspan="5" class="muted">Aucun bulletin pour cet étudiant.</td></tr> }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+
+@if (vue() === 'bulletin' && bulletinCourant(); as detail) {
+  <div class="actions-bulletin no-print">
+    <button mat-stroked-button (click)="imprimerBulletin()"><mat-icon>print</mat-icon> Imprimer le bulletin</button>
+  </div>
+
+  <div class="document-bulletin">
+    <div class="entete-impression">
+      <div class="entete-etablissement">
+        @if (etablissement()?.logo; as logo) {
+          <img [src]="logo" alt="" class="logo-etablissement-impression" />
+        }
+        <div>
+          <div class="etablissement-nom">{{ etablissement()?.nom || session()?.tenantNom }}</div>
+          @if (etablissement()?.adresse || etablissement()?.telephone) {
+            <div class="etablissement-coordonnees">
+              {{ etablissement()?.adresse }}@if (etablissement()?.adresse && etablissement()?.telephone) { <ng-container> · </ng-container> }{{ etablissement()?.telephone }}
+            </div>
+          }
+        </div>
+      </div>
+      <div class="entete-identite">
+        <div class="titre-bulletin">Bulletin de notes<br />{{ detail.bulletin.semestreLibelle }}</div>
+        <table class="table-identite">
+          <tr><th>Année académique</th><td>{{ detail.bulletin.anneeAcademiqueLibelle }}</td></tr>
+          <tr><th>Matricule</th><td>{{ detail.bulletin.matricule }}</td></tr>
+          <tr><th>Nom et prénom</th><td>{{ detail.bulletin.etudiantNomComplet }}</td></tr>
+          <tr><th>Sexe</th><td>{{ detail.bulletin.etudiantSexe || '—' }}</td></tr>
+          <tr>
+            <th>Lieu &amp; Date naissance</th>
+            <td>
+              {{ detail.bulletin.etudiantLieuNaissance || '—' }}@if (detail.bulletin.etudiantDateNaissance) {<ng-container
+                  >, le {{ detail.bulletin.etudiantDateNaissance | date: 'dd/MM/yyyy' }}</ng-container
+                >}
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="surface-card contexte-bulletin">
+      <div class="contexte-identite">
+        <span class="avatar-etudiant">{{ detail.bulletin.etudiantNomComplet.charAt(0) }}</span>
+        <div class="contexte-grille">
+          <div class="contexte-nom"><span class="etiquette">Étudiant</span><strong>{{ detail.bulletin.etudiantNomComplet }}</strong></div>
+          <div><span class="etiquette">Matricule</span><code>{{ detail.bulletin.matricule }}</code></div>
+          <div><span class="etiquette">Sexe</span>{{ detail.bulletin.etudiantSexe || '—' }}</div>
+          <div>
+            <span class="etiquette">Lieu &amp; date de naissance</span
+            >{{ detail.bulletin.etudiantLieuNaissance || '—' }}@if (detail.bulletin.etudiantDateNaissance) {<ng-container
+                >, le {{ detail.bulletin.etudiantDateNaissance | date: 'dd/MM/yyyy' }}</ng-container
+              >}
+          </div>
+          <div><span class="etiquette">Année académique</span>{{ detail.bulletin.anneeAcademiqueLibelle }}</div>
+          <div><span class="etiquette">Semestre</span>{{ detail.bulletin.semestreLibelle }}</div>
+        </div>
+      </div>
+      <div class="moyenne-globale" [class.positif]="detail.bulletin.semestreValide" [class.negatif]="!detail.bulletin.semestreValide">
+        <div class="moyenne-anneau">
+          <div class="moyenne-valeur">{{ detail.bulletin.moyenneGenerale }}<span class="moyenne-denominateur">/20</span></div>
+        </div>
+        <span class="status-chip" [class.chip-success]="detail.bulletin.semestreValide" [class.chip-error]="!detail.bulletin.semestreValide">
+          <mat-icon>{{ detail.bulletin.semestreValide ? 'verified' : 'error_outline' }}</mat-icon>
+          {{ detail.bulletin.semestreValide ? 'Semestre validé' : 'Semestre non validé' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="surface-card ligne-academique">
+      <div class="badge-academique"><mat-icon>public</mat-icon><span><span class="etiquette">Domaine</span>{{ detail.bulletin.domaineLibelle || '—' }}</span></div>
+      <div class="badge-academique"><mat-icon>workspace_premium</mat-icon><span><span class="etiquette">Mention</span>{{ detail.bulletin.mentionLibelle || '—' }}</span></div>
+      <div class="badge-academique"><mat-icon>science</mat-icon><span><span class="etiquette">Spécialité</span>{{ detail.bulletin.filiereLibelle || '—' }}</span></div>
+      <div class="badge-academique"><mat-icon>military_tech</mat-icon><span><span class="etiquette">Grade</span>{{ detail.bulletin.grade || '—' }}</span></div>
+    </div>
+
+    <div class="surface-card">
+      <div class="card-head no-print">
+        <h3><mat-icon class="titre-icone">menu_book</mat-icon> Matières</h3>
+      </div>
+      <div class="table-scroll">
+        <table class="styled-table table-matieres">
+          <colgroup>
+            <col class="col-ec" />
+            <col class="col-pres" />
+            <col class="col-cc" />
+            <col class="col-examen" />
+            <col class="col-rattrapage" />
+            <col class="col-moyenne" />
+            <col class="col-credits" />
+            <col class="col-coefficient" />
+            <col class="col-appreciation" />
+            <col class="col-remarque" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>UE / Élément constitutif</th>
+              <th>Prés.</th>
+              <th>CC <span class="poids">40%</span></th>
+              <th>Examen <span class="poids">60%</span></th>
+              <th>Rattrapage <span class="poids">100%</span></th>
+              <th>Moy. EC</th>
+              <th>Crédits</th>
+              <th>Coefficient</th>
+              <th>Appréciation</th>
+              <th class="no-print">Remarque</th>
+              <th class="no-print"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (ue of detail.unitesEnseignement; track ue.id) {
+              <tr class="ligne-ue">
+                <td colspan="9" class="ue-titre">{{ ue.intitule }}</td>
+                <td class="no-print"></td>
+                <td class="no-print"></td>
+              </tr>
+              @for (m of ue.matieres; track m.elementConstitutifId) {
+                <tr class="ligne-matiere ligne-cliquable" (click)="ouvrirEditionMatiere(m, ue.intitule)">
+                  <td class="ec-nom">{{ m.intitule }}</td>
+                  <td>
+                    @if (!m.presence) {
+                      <span class="status-chip chip-warning petit">absent</span>
+                    } @else {
+                      <span class="muted">oui</span>
+                    }
+                  </td>
+                  <td class="numeric">{{ m.cc ?? '—' }}</td>
+                  <td class="numeric">{{ m.examen ?? '—' }}</td>
+                  <td class="numeric">{{ m.rattrapage ?? '—' }}</td>
+                  <td class="numeric">
+                    @if (m.moyenne !== null) {
+                      <span class="status-chip petit" [class.chip-success]="m.moyenne >= 10" [class.chip-error]="m.moyenne < 10">
+                        {{ m.moyenne }}
+                      </span>
+                    } @else {
+                      <span class="muted">—</span>
+                    }
+                  </td>
+                  <td class="numeric muted">{{ m.credits }}</td>
+                  <td class="numeric muted">{{ m.coefficient }}</td>
+                  <td class="muted">{{ m.appreciation || '—' }}</td>
+                  <td class="muted ec-remarque no-print">{{ m.remarque || '—' }}</td>
+                  <td class="no-print">
+                    <button mat-icon-button (click)="ouvrirEditionMatiere(m, ue.intitule); $event.stopPropagation()" matTooltip="Modifier">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="effacerMatiere(m); $event.stopPropagation()" matTooltip="Effacer la note">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              }
+              <tr class="ligne-sous-total">
+                <td colspan="5">Moyenne UE</td>
+                <td class="numeric"><strong>{{ ue.moyenne ?? '—' }}</strong></td>
+                <td class="numeric">{{ ue.credits }}</td>
+                <td>
+                  <span class="status-chip" [class.chip-success]="ue.valide" [class.chip-error]="!ue.valide">
+                    {{ ue.valide ? 'Validé' : 'Non validé' }}
+                  </span>
+                </td>
+                <td class="no-print"></td>
+                <td class="no-print"></td>
+              </tr>
+            } @empty {
+              <tr><td colspan="10" class="muted">Aucune unité d'enseignement configurée pour ce semestre.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="surface-card bilan-bulletin">
+      <div class="bilan-ligne">
+        <span><mat-icon>workspace_premium</mat-icon> Total crédits obtenus</span>
+        <strong>{{ detail.bulletin.creditsValides }} / {{ detail.bulletin.creditsTotal }}</strong>
+      </div>
+      <div class="barre-credits">
+        <div
+          class="barre-credits-remplie"
+          [style.width.%]="detail.bulletin.creditsTotal ? (detail.bulletin.creditsValides / detail.bulletin.creditsTotal) * 100 : 0"
+        ></div>
+      </div>
+      <div class="bilan-ligne">
+        <span><mat-icon>bar_chart</mat-icon> Moyenne du semestre</span>
+        <strong>{{ detail.bulletin.moyenneGenerale }} / 20</strong>
+      </div>
+      <div class="bilan-ligne appreciation-ligne">
+        <span><mat-icon>rate_review</mat-icon> Appréciation conseil de classe</span>
+        <div class="appreciation-valeur">
+          <span>{{ detail.bulletin.appreciationConseilClasse || '—' }}</span>
+          <button mat-icon-button class="no-print" (click)="ouvrirAppreciation()"><mat-icon>edit</mat-icon></button>
+        </div>
+      </div>
+      @if (panneauAppreciation()) {
+        <form [formGroup]="formAppreciation" (ngSubmit)="soumettreAppreciation()" class="form-appreciation no-print">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grow">
+            <mat-label>Appréciation</mat-label>
+            <textarea matInput formControlName="appreciationConseilClasse" rows="2"></textarea>
+          </mat-form-field>
+          <button mat-flat-button color="primary" type="submit">Enregistrer</button>
+        </form>
+      }
+    </div>
+
+    <div class="pied-impression">
+      <span>Édité le {{ detail.bulletin.dateGeneration | date: 'dd/MM/yyyy à HH:mm' }}</span>
+      <span class="signature">Directeur des études</span>
+    </div>
+  </div>
+}

@@ -1,0 +1,56 @@
+.contenu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 420px;
+}
+
+.bloc-logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.apercu-logo {
+  height: 64px;
+  width: 64px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: var(--mat-sys-surface-container-low);
+}
+
+.apercu-logo-vide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mat-sys-on-surface-variant);
+  border: 1px dashed var(--mat-sys-outline-variant);
+}
+
+.bouton-fichier {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--mat-sys-primary);
+
+  &:hover {
+    background: var(--mat-sys-surface-container-low);
+  }
+}
+
+.aide {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.8rem;
+  margin: 4px 0 0;
+}
+
+.erreur {
+  color: var(--mat-sys-error);
+  font-size: 0.9rem;
+}

@@ -1,0 +1,46 @@
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      @if (logoEtablissement(); as logo) {
+        <img [src]="logo" alt="" class="brand-logo" />
+      } @else {
+        <mat-icon class="brand-icon">school</mat-icon>
+      }
+      <div>
+        <div class="brand-title">{{ titrePlateforme() }}</div>
+        @if (session()?.tenantCode) {
+          <div class="brand-sub">{{ session()?.tenantCode }}</div>
+        }
+      </div>
+    </div>
+
+    <nav class="nav">
+      @for (group of navGroups(); track group.label) {
+        <div class="nav-group">
+          <div class="nav-group-label">{{ group.label }}</div>
+          @for (item of group.items; track item.route) {
+            <a
+              class="nav-link"
+              [routerLink]="item.route"
+              routerLinkActive="active"
+            >
+              <mat-icon [class]="item.tint">{{ item.icon }}</mat-icon>
+              <span>{{ item.label }}</span>
+            </a>
+          }
+        </div>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <button mat-stroked-button (click)="deconnecter()" class="logout-btn">
+        <mat-icon>logout</mat-icon>
+        Se déconnecter
+      </button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <router-outlet />
+  </main>
+</div>

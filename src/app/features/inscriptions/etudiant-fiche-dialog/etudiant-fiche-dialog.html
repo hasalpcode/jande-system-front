@@ -1,0 +1,103 @@
+<div class="entete-fiche">
+  <h2 mat-dialog-title>Fiche étudiant</h2>
+  <span class="flex-spacer"></span>
+  <button mat-icon-button (click)="imprimer()" matTooltip="Imprimer"><mat-icon>print</mat-icon></button>
+  <button mat-icon-button (click)="fermer()" matTooltip="Fermer"><mat-icon>close</mat-icon></button>
+</div>
+
+<mat-dialog-content class="contenu">
+  <section class="bloc">
+    <div class="banniere">État civil</div>
+    <div class="grille-etat-civil">
+      <div class="champ"><label>Matricule</label><div class="valeur">{{ etudiant.matricule }}</div></div>
+      <div class="champ"><label>Civilité</label><div class="valeur">{{ etudiant.civilite || '—' }}</div></div>
+      <div class="champ"><label>Sexe</label><div class="valeur">{{ etudiant.sexe || '—' }}</div></div>
+      <div class="champ"><label>N° identité</label><div class="valeur">{{ etudiant.numeroIdentite || '—' }}</div></div>
+
+      <div class="photo-profil">
+        @if (etudiant.photo; as src) {
+          <img [src]="src" alt="Photo de profil" />
+        } @else {
+          <mat-icon>person</mat-icon>
+          <span>Photo</span>
+        }
+      </div>
+
+      <div class="champ champ-large"><label>Nom</label><div class="valeur">{{ etudiant.nom }}</div></div>
+      <div class="champ champ-large"><label>Prénom</label><div class="valeur">{{ etudiant.prenom }}</div></div>
+      <div class="champ"><label>Date de naissance</label><div class="valeur">{{ etudiant.dateNaissance || '—' }}</div></div>
+      <div class="champ"><label>Lieu de naissance</label><div class="valeur">{{ etudiant.lieuNaissance || '—' }}</div></div>
+      <div class="champ"><label>Nationalité</label><div class="valeur">{{ nationaliteLibelle() || '—' }}</div></div>
+      <div class="champ"><label>Situation matrimoniale</label><div class="valeur">{{ etudiant.situationMatrimoniale || '—' }}</div></div>
+    </div>
+  </section>
+
+  <section class="bloc">
+    <div class="banniere">Contacts</div>
+    <div class="grille-3">
+      <div class="champ"><label>Téléphone</label><div class="valeur">{{ etudiant.contact || '—' }}</div></div>
+      <div class="champ"><label>Téléphone 2</label><div class="valeur">{{ etudiant.telephone2 || '—' }}</div></div>
+      <div class="champ"><label>Site web</label><div class="valeur">{{ etudiant.siteWeb || '—' }}</div></div>
+      <div class="champ"><label>Réseau social</label><div class="valeur">{{ etudiant.reseauSocial || '—' }}</div></div>
+      <div class="champ"><label>Adresse</label><div class="valeur">{{ etudiant.adresse || '—' }}</div></div>
+      <div class="champ"><label>Email</label><div class="valeur">{{ etudiant.email || '—' }}</div></div>
+    </div>
+  </section>
+
+  @if (aInfosProfessionnelles) {
+    <section class="bloc">
+      <div class="banniere">Info. professionnelles</div>
+      <div class="grille-2">
+        <div class="champ"><label>Société</label><div class="valeur">{{ etudiant.infosProfessionnelles?.societe || '—' }}</div></div>
+        <div class="champ"><label>Téléphone bureau</label><div class="valeur">{{ etudiant.infosProfessionnelles?.telephoneBureau || '—' }}</div></div>
+        <div class="champ"><label>Profession</label><div class="valeur">{{ etudiant.infosProfessionnelles?.profession || '—' }}</div></div>
+        <div class="champ"><label>Fonction</label><div class="valeur">{{ etudiant.infosProfessionnelles?.fonction || '—' }}</div></div>
+        <div class="champ champ-pleine-largeur"><label>Adresse société</label><div class="valeur">{{ etudiant.infosProfessionnelles?.adresseSociete || '—' }}</div></div>
+      </div>
+    </section>
+  }
+
+  @if (aCursusAnterieur) {
+    <section class="bloc">
+      <div class="banniere">Info. cursus</div>
+      <div class="grille-2">
+        <div class="champ champ-pleine-largeur"><label>Dernier établissement</label><div class="valeur">{{ etudiant.cursusAnterieur?.dernierEtablissement || '—' }}</div></div>
+        <div class="champ"><label>Niveau étude</label><div class="valeur">{{ etudiant.cursusAnterieur?.niveauEtude || '—' }}</div></div>
+        <div class="champ"><label>Année fréquentation</label><div class="valeur">{{ etudiant.cursusAnterieur?.annee || '—' }}</div></div>
+        <div class="champ champ-pleine-largeur"><label>Diplôme</label><div class="valeur">{{ etudiant.cursusAnterieur?.diplomeTitre || '—' }}</div></div>
+      </div>
+    </section>
+  }
+
+  @if (aDisponibilite || etudiant.maladies || etudiant.observation || etudiant.autresInfos || etudiant.fraisPreinscription) {
+    <section class="bloc">
+      <div class="banniere">Divers</div>
+      <div class="grille-2">
+        @if (aDisponibilite) {
+          <div class="champ"><label>Disponibilité</label><div class="valeur">{{ etudiant.disponibilite?.periode || '—' }}</div></div>
+          <div class="champ">
+            <label>Horaire</label>
+            <div class="valeur">{{ etudiant.disponibilite?.heureDebut || '—' }} @if (etudiant.disponibilite?.heureFin) { → {{ etudiant.disponibilite?.heureFin }} }</div>
+          </div>
+        }
+        @if (etudiant.fraisPreinscription) {
+          <div class="champ"><label>Frais de préinscription</label><div class="valeur">{{ etudiant.fraisPreinscription }}</div></div>
+        }
+        @if (etudiant.maladies) {
+          <div class="champ champ-pleine-largeur"><label>Maladies / allergies</label><div class="valeur">{{ etudiant.maladies }}</div></div>
+        }
+        @if (etudiant.autresInfos) {
+          <div class="champ champ-pleine-largeur"><label>Autres informations</label><div class="valeur">{{ etudiant.autresInfos }}</div></div>
+        }
+        @if (etudiant.observation) {
+          <div class="champ champ-pleine-largeur"><label>Observation</label><div class="valeur">{{ etudiant.observation }}</div></div>
+        }
+      </div>
+    </section>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-stroked-button (click)="imprimer()"><mat-icon>print</mat-icon> Imprimer</button>
+  <button mat-flat-button color="primary" (click)="fermer()">Fermer</button>
+</mat-dialog-actions>

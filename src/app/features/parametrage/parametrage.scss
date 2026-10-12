@@ -1,0 +1,41 @@
+.tab-content {
+  padding-top: 20px;
+}
+
+.card-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.contenu-etablissement {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px 20px;
+}
+
+.logo-etablissement {
+  height: 60px;
+  width: 60px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: var(--mat-sys-surface-container-low);
+  flex-shrink: 0;
+}
+
+.logo-etablissement-vide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.nom-etablissement {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.small-text {
+  font-size: 0.8rem;
+}

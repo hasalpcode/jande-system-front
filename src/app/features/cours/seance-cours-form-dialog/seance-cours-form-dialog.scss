@@ -1,0 +1,34 @@
+.contenu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 560px;
+}
+
+.ligne {
+  display: flex;
+  gap: 12px;
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+.muted {
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0 0 4px;
+}
+
+.erreur {
+  color: var(--mat-sys-error);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 760px) {
+  .contenu {
+    min-width: 0;
+  }
+  .ligne {
+    flex-direction: column;
+  }
+}

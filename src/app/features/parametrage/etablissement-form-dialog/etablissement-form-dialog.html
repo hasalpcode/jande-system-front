@@ -1,0 +1,48 @@
+<h2 mat-dialog-title>Établissement</h2>
+
+<form [formGroup]="form" (ngSubmit)="soumettre()">
+  <mat-dialog-content class="contenu">
+    <div class="bloc-logo">
+      @if (logo(); as src) {
+        <img [src]="src" alt="Logo" class="apercu-logo" />
+        <button mat-button type="button" (click)="retirerLogo()"><mat-icon>close</mat-icon> Retirer le logo</button>
+      } @else {
+        <div class="apercu-logo apercu-logo-vide"><mat-icon>image</mat-icon></div>
+        <label class="bouton-fichier">
+          <mat-icon>upload</mat-icon> Choisir un logo
+          <input type="file" accept="image/*" (change)="selectionnerLogo($event)" hidden />
+        </label>
+      }
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Nom de l'établissement</mat-label>
+      <input matInput formControlName="nom" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Adresse</mat-label>
+      <input matInput formControlName="adresse" placeholder="Ville, quartier, rue…" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Téléphone</mat-label>
+      <input matInput formControlName="telephone" placeholder="+225 07 00 00 00 00" />
+    </mat-form-field>
+
+    <p class="aide">Le logo, l'adresse et le téléphone apparaissent dans l'en-tête des bulletins et des documents imprimables.</p>
+
+    @if (erreur()) {
+      <p class="erreur">{{ erreur() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="annuler()">Annuler</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="enCours()">
+      @if (enCours()) {
+        <mat-spinner diameter="20" />
+      } @else {
+        Enregistrer
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

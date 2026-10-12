@@ -1,0 +1,50 @@
+.tab-content {
+  padding-top: 20px;
+}
+
+.spinner-row {
+  display: flex;
+  justify-content: center;
+  padding: 40px 0;
+}
+
+.small-text {
+  font-size: 0.78rem;
+}
+
+.total-label {
+  text-align: right;
+  font-weight: 600;
+  color: var(--mat-sys-on-surface-variant);
+  border-top: 2px solid var(--mat-sys-outline);
+}
+
+.total-value {
+  font-weight: 700;
+  border-top: 2px solid var(--mat-sys-outline);
+  font-family: var(--app-font-display);
+}
+
+.situation-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  padding: 18px;
+
+  .stat-tile {
+    box-shadow: none;
+  }
+
+  .solde-nul .stat-value {
+    color: var(--app-success);
+  }
+  .solde-positif .stat-value {
+    color: var(--mat-sys-error);
+  }
+}
+
+@media (max-width: 700px) {
+  .situation-grid {
+    grid-template-columns: 1fr;
+  }
+}

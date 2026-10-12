@@ -1,0 +1,57 @@
+<div class="page-header">
+  <div>
+    <h1>Bonjour 👋</h1>
+    <p>{{ session()?.tenantNom }} — vue d'ensemble</p>
+  </div>
+</div>
+
+<div class="stat-row dashboard-stat-row">
+  @for (tile of statTiles(); track tile.label) {
+    <div class="stat-tile" [style.border-left-color]="tile.color">
+      <div class="stat-tile-head">
+        <div class="stat-label" [style.color]="tile.color">{{ tile.label }}</div>
+        <mat-icon class="stat-tile-icon">{{ tile.icon }}</mat-icon>
+      </div>
+      <div class="stat-value">{{ tile.value }}</div>
+    </div>
+  }
+</div>
+
+<h2 class="section-title">Nombre d'étudiants par nationalité</h2>
+<div class="chart-card">
+  @if (nationaliteStats().length) {
+    <div class="donut-block">
+      <svg class="donut" viewBox="0 0 100 100" role="img" aria-label="Répartition des étudiants par nationalité">
+        <circle class="donut-track" cx="50" cy="50" r="40" />
+        <g transform="rotate(-90 50 50)">
+          @for (seg of nationaliteStats(); track seg.code) {
+            <circle
+              class="donut-segment"
+              cx="50"
+              cy="50"
+              r="40"
+              [style.stroke]="seg.color"
+              [style.stroke-dasharray]="seg.dasharray"
+              [style.stroke-dashoffset]="seg.dashoffset"
+            />
+          }
+        </g>
+      </svg>
+      <div class="donut-center">
+        <div class="donut-total">{{ nbEtudiantsPourDonut() ?? '—' }}</div>
+        <div class="donut-total-label">étudiants</div>
+      </div>
+    </div>
+    <ul class="donut-legend">
+      @for (seg of nationaliteStats(); track seg.code) {
+        <li>
+          <span class="legend-dot" [style.background]="seg.color"></span>
+          <span class="legend-label">{{ seg.libelle }}</span>
+          <span class="legend-value">{{ seg.count }} ({{ seg.percent }}%)</span>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="chart-empty">Aucune donnée de nationalité disponible.</p>
+  }
+</div>

@@ -1,0 +1,65 @@
+<div class="page-header">
+  <div>
+    <h1>Utilisateurs</h1>
+    <p>Personnel administratif, enseignants, staff — {{ authService.currentSession()?.tenantNom }}</p>
+  </div>
+  <div class="page-header-actions">
+    <button mat-flat-button color="primary" (click)="ouvrirCreation()">
+      <mat-icon>add</mat-icon>
+      Nouvel utilisateur
+    </button>
+  </div>
+</div>
+
+<div class="surface-card">
+  @if (chargement()) {
+    <div class="loading-block"><span class="spinner"></span> Chargement…</div>
+  } @else if (utilisateurs().length === 0) {
+    <p class="data-table-empty">Aucun utilisateur pour l'instant.</p>
+  } @else {
+    <div class="table-scroll">
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Téléphone</th>
+            <th>Rôles</th>
+            <th>Fonctionnalités</th>
+            <th>Statut</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of utilisateurs(); track u.id) {
+            <tr>
+              <td class="muted"><code>{{ u.code }}</code></td>
+              <td>{{ u.prenom }} {{ u.nom }}</td>
+              <td class="muted">{{ u.email }}</td>
+              <td class="muted">{{ u.telephone || '—' }}</td>
+              <td>
+                @for (role of u.roles; track role) {
+                  <span class="status-chip chip-primary" style="margin-right: 4px;">{{ role }}</span>
+                }
+              </td>
+              <td>
+                @for (permission of u.permissions; track permission) {
+                  <span class="status-chip chip-primary" style="margin-right: 4px;">{{ permission }}</span>
+                } @empty {
+                  <span class="muted">—</span>
+                }
+              </td>
+              <td>
+                <span class="status-chip" [class.chip-success]="u.actif" [class.chip-neutral]="!u.actif">
+                  {{ u.actif ? 'Actif' : 'Inactif' }}
+                </span>
+              </td>
+              <td><button mat-icon-button (click)="ouvrirEdition(u)"><mat-icon>edit</mat-icon></button></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

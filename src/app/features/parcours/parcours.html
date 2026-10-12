@@ -1,0 +1,139 @@
+<div class="page-header">
+  <div>
+    <h1>Parcours</h1>
+    <p>Classes et unités d'enseignement — les crédits et volumes horaires globaux sont calculés, jamais saisis.</p>
+  </div>
+</div>
+
+<div class="surface-card" style="margin-bottom: 20px;">
+  @if (anneeAfficheeClasses()) {
+    <!-- Étape 2 : liste des classes de l'année choisie. -->
+    <div class="card-head">
+      <div class="fil-ariane">
+        <button mat-button (click)="retourAnneeClasses()"><mat-icon>chevron_left</mat-icon> Année</button>
+        <h3>Classes</h3>
+        @if (anneeClassesSelectionnee(); as a) {
+          <span class="muted small-text">({{ a.dateDebut }} → {{ a.dateFin }})</span>
+        }
+      </div>
+      <button mat-flat-button color="primary" (click)="ouvrirAjoutClasse()"><mat-icon>add</mat-icon> Ajouter</button>
+    </div>
+    <div class="table-scroll">
+      <table class="styled-table">
+        <thead><tr><th>Libellé</th><th>Niveau</th><th>Effectif max</th><th></th></tr></thead>
+        <tbody>
+          @for (c of classesDeLAnnee(); track c.id) {
+            <tr>
+              <td>{{ c.libelle }}</td>
+              <td class="muted">{{ c.niveauLibelle || '—' }}</td>
+              <td class="numeric">{{ c.effectifMax }}</td>
+              <td>
+                <button mat-icon-button (click)="ouvrirEditionClasse(c)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
+                <button mat-icon-button (click)="supprimerClasse(c.id)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
+              </td>
+            </tr>
+          }
+          @empty { <tr><td colspan="4" class="muted">Aucune classe pour cette année académique.</td></tr> }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <!-- Étape 1 : choix de l'année académique. -->
+    <div class="card-head"><h3>Classes</h3></div>
+    <form [formGroup]="formAnneeClasses" (ngSubmit)="voirClasses()" class="inline-form">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Année académique</mat-label>
+        <mat-select formControlName="anneeAcademiqueId">
+          @for (a of annees(); track a.id) { <mat-option [value]="a.id">{{ a.libelle }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="submit">Voir les classes</button>
+    </form>
+  }
+</div>
+
+<div class="surface-card">
+  @if (ueSelectionnee(); as ue) {
+    <!-- Étape 2 : éléments constitutifs d'UNE unité d'enseignement - seule cette étape est
+         affichée, avec un fil d'Ariane pour revenir à la liste des UE. -->
+    <div class="card-head">
+      <div class="fil-ariane">
+        <button mat-button (click)="retourUnitesEnseignement()"><mat-icon>chevron_left</mat-icon> Unités d'enseignement</button>
+        <h3>{{ ue.code }} — {{ ue.intitule }}</h3>
+      </div>
+      <button mat-flat-button color="primary" (click)="ouvrirAjoutEc()"><mat-icon>add</mat-icon> Ajouter un élément constitutif</button>
+    </div>
+    @if (chargementElements()) {
+      <div class="loading-block"><span class="spinner"></span> Chargement…</div>
+    } @else {
+      <div class="table-scroll">
+        <table class="styled-table">
+          <thead>
+            <tr><th>Code</th><th>Élément constitutif</th><th>CM</th><th>TD/TP</th><th>TPE</th><th>Vol. global</th><th>Crédits</th><th>Coefficient</th></tr>
+          </thead>
+          <tbody>
+            @for (ec of elementsDeLUe(); track ec.id) {
+              <tr>
+                <td class="muted">{{ ec.code }}</td>
+                <td>{{ ec.intitule }}</td>
+                <td class="numeric muted">{{ ec.volumeHoraireCm }}</td>
+                <td class="numeric muted">{{ ec.volumeHoraireTdTp }}</td>
+                <td class="numeric muted">{{ ec.volumeHoraireTpe }}</td>
+                <td class="numeric"><strong>{{ ec.volumeHoraireGlobal ?? '—' }}h</strong></td>
+                <td class="numeric">{{ ec.credits }}</td>
+                <td class="numeric">{{ ec.coefficient }}</td>
+              </tr>
+            } @empty {
+              <tr><td colspan="8" class="muted">Aucun élément constitutif pour l'instant.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  } @else if (anneeAfficheeUe()) {
+    <!-- Étape 2 : liste des unités d'enseignement de l'année choisie. -->
+    <div class="card-head">
+      <div class="fil-ariane">
+        <button mat-button (click)="retourAnneeUe()"><mat-icon>chevron_left</mat-icon> Année</button>
+        <h3>Unités d'enseignement</h3>
+      </div>
+      <button mat-flat-button color="primary" (click)="ouvrirAjoutUe()"><mat-icon>add</mat-icon> Ajouter</button>
+    </div>
+    @if (chargement()) {
+      <div class="loading-block"><span class="spinner"></span> Chargement…</div>
+    } @else if (ueDeLAnnee().length === 0) {
+      <p class="data-table-empty">Aucune unité d'enseignement pour cette année académique.</p>
+    } @else {
+      <div class="ue-list">
+        @for (ue of ueDeLAnnee(); track ue.id) {
+          <div class="ue-row" (click)="selectionnerUe(ue)">
+            <span class="ue-code">{{ ue.code }}</span>
+            <span class="ue-intitule">{{ ue.intitule }}</span>
+            <span class="muted small-text">{{ ue.semestreLibelle || '—' }}</span>
+            <span class="status-chip chip-primary">{{ ue.credits ?? '—' }} crédits</span>
+            <span class="muted small-text">{{ typeUeLabel(ue.type) }}</span>
+            <button mat-icon-button (click)="$event.stopPropagation(); ouvrirEditionUe(ue)" matTooltip="Modifier">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button (click)="$event.stopPropagation(); supprimerUniteEnseignement(ue)" matTooltip="Supprimer">
+              <mat-icon>delete</mat-icon>
+            </button>
+            <mat-icon class="chevron-end">chevron_right</mat-icon>
+          </div>
+        }
+      </div>
+    }
+  } @else {
+    <!-- Étape 1 : choix de l'année académique. -->
+    <div class="card-head"><h3>Unités d'enseignement</h3></div>
+    <form [formGroup]="formAnneeUe" (ngSubmit)="voirUe()" class="inline-form">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Année académique</mat-label>
+        <mat-select formControlName="anneeAcademiqueId">
+          @for (a of annees(); track a.id) { <mat-option [value]="a.id">{{ a.libelle }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="submit">Voir les unités d'enseignement</button>
+    </form>
+  }
+</div>

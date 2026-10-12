@@ -1,0 +1,54 @@
+<h2 mat-dialog-title>Ajouter un paiement</h2>
+
+<form [formGroup]="form" (ngSubmit)="soumettre()">
+  <mat-dialog-content class="contenu">
+    <p class="muted">{{ data.calendrier.nomComplet }} ({{ data.calendrier.matricule }}) — {{ data.calendrier.classeLibelle }}</p>
+    <mat-form-field appearance="outline">
+      <mat-label>Échéance</mat-label>
+      <mat-select formControlName="echeancePrevueId">
+        @for (e of data.calendrier.echeances; track e.echeancePrevueId) {
+          <mat-option [value]="e.echeancePrevueId">
+            {{ libelleMois(e.dateEcheance) }} — {{ libelleType(e.type) }} — reste {{ (e.montantPrevu - e.montantPaye) | number: '1.0-0' }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <div class="ligne">
+      <mat-form-field appearance="outline">
+        <mat-label>Mode de règlement</mat-label>
+        <mat-select formControlName="modePaiementId">
+          @for (m of data.modesPaiement; track m.id) { <mat-option [value]="m.id">{{ m.libelle }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="small">
+        <mat-label>Montant</mat-label>
+        <input matInput type="number" formControlName="montant" [max]="resteAPayer()" />
+        <mat-hint>Reste à payer : {{ resteAPayer() | number: '1.0-0' }}</mat-hint>
+        @if (form.controls.montant.hasError('max')) {
+          <mat-error>Le montant ne peut pas dépasser le reste à payer ({{ resteAPayer() | number: '1.0-0' }}).</mat-error>
+        } @else if (form.controls.montant.hasError('min')) {
+          <mat-error>Le montant doit être positif.</mat-error>
+        }
+      </mat-form-field>
+    </div>
+    <mat-form-field appearance="outline">
+      <mat-label>Observations</mat-label>
+      <input matInput formControlName="reference" />
+    </mat-form-field>
+
+    @if (erreur()) {
+      <p class="erreur">{{ erreur() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="annuler()">Annuler</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="enCours()">
+      @if (enCours()) {
+        <mat-spinner diameter="20" />
+      } @else {
+        Enregistrer
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

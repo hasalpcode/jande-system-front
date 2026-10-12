@@ -1,0 +1,113 @@
+.tab-content {
+  padding-top: 20px;
+}
+
+.small-text {
+  font-size: 0.78rem;
+}
+
+.recherche-etudiant {
+  width: 280px;
+  margin: 0 18px 14px;
+}
+
+.situation-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding: 18px;
+
+  .stat-tile {
+    box-shadow: none;
+  }
+
+  .solde-nul .stat-value {
+    color: var(--app-success);
+  }
+  .solde-positif .stat-value {
+    color: var(--mat-sys-error);
+  }
+}
+
+// Calendrier previsionnel : chaque echeance est un point sur une ligne verticale,
+// colore selon son statut (payee / partielle / a venir / en retard).
+.timeline {
+  padding: 4px 20px 22px;
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 14px;
+  position: relative;
+  padding-bottom: 18px;
+
+  &:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 16px;
+    bottom: -4px;
+    width: 2px;
+    background: var(--mat-sys-outline-variant);
+  }
+}
+
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+  background: var(--mat-sys-outline);
+  border: 2px solid var(--mat-sys-surface-container-lowest);
+  box-shadow: 0 0 0 1px var(--mat-sys-outline-variant);
+}
+
+.statut-payee .timeline-dot {
+  background: var(--app-success);
+}
+.statut-partielle .timeline-dot {
+  background: var(--app-warning);
+}
+.statut-en_retard .timeline-dot {
+  background: var(--mat-sys-error);
+}
+.statut-a_venir .timeline-dot {
+  background: var(--mat-sys-outline);
+}
+
+.timeline-content {
+  flex: 1;
+  background: var(--mat-sys-surface-container-low);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.timeline-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.timeline-titre {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.timeline-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 700px) {
+  .situation-grid {
+    grid-template-columns: 1fr;
+  }
+}

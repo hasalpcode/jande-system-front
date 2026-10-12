@@ -1,0 +1,49 @@
+.fil-ariane {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  h3 { margin: 0; }
+}
+
+.ue-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 18px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+
+  &:last-child {
+    border-bottom: none;
+  }
+  &:hover {
+    background: var(--mat-sys-surface-container-low);
+  }
+}
+
+.chevron-end {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.ue-code {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.8rem;
+  color: var(--mat-sys-on-surface-variant);
+  min-width: 90px;
+}
+
+.ue-intitule {
+  flex: 1;
+  font-weight: 600;
+}
+
+.small-text {
+  font-size: 0.78rem;
+}

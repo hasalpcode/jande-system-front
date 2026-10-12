@@ -1,0 +1,114 @@
+<div class="page-header">
+  <div>
+    <h1>Documents</h1>
+    <p>Attestations et certificats — un template par type de document, personnalisable par établissement.</p>
+  </div>
+</div>
+
+<mat-tab-group animationDuration="120ms">
+  <mat-tab label="Templates">
+    <div class="tab-content surface-card">
+      <div class="card-head">
+        <h3>Templates</h3>
+        <button mat-icon-button (click)="panneauTemplate() ? fermerPanneauTemplate() : ouvrirNouveauTemplate()">
+          <mat-icon>{{ panneauTemplate() ? 'close' : 'add' }}</mat-icon>
+        </button>
+      </div>
+      @if (panneauTemplate()) {
+        <form [formGroup]="formTemplate" (ngSubmit)="soumettreTemplate()" class="inline-form">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Type de document</mat-label>
+            <mat-select formControlName="type" [disabled]="!!editionTemplateId()">
+              @for (t of typesDocument; track t) { <mat-option [value]="t">{{ t }}</mat-option> }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grow"><mat-label>En-tête</mat-label><input matInput formControlName="enTete" /></mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grow champ-contenu">
+            <mat-label>Section introductive</mat-label>
+            <textarea matInput formControlName="sectionIntroduction" rows="4"></textarea>
+          </mat-form-field>
+
+          <div class="section-etudiant-apercu">
+            <mat-icon>badge</mat-icon>
+            <div>
+              <strong>Section informations étudiant</strong>
+              <p class="muted">
+                Remplie automatiquement par le système — nom, prénom, date et lieu de naissance. Rien à saisir ici :
+                elle s'insère comme texte normal à la suite de l'introduction, pas sous forme de tableau.
+              </p>
+            </div>
+          </div>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grow champ-contenu">
+            <mat-label>Section conclusion</mat-label>
+            <textarea matInput formControlName="sectionConclusion" rows="4"></textarea>
+          </mat-form-field>
+
+          <button mat-flat-button color="primary" type="submit">{{ editionTemplateId() ? 'Enregistrer' : 'Ajouter' }}</button>
+        </form>
+      }
+      <div class="table-scroll">
+        <table class="styled-table">
+          <thead><tr><th>Type</th><th>En-tête</th><th></th></tr></thead>
+          <tbody>
+            @for (t of templates(); track t.id) {
+              <tr>
+                <td><span class="status-chip chip-neutral">{{ t.type }}</span></td>
+                <td class="muted">{{ t.enTete || '—' }}</td>
+                <td>
+                  <button mat-icon-button (click)="editerTemplate(t)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
+                  <button mat-icon-button (click)="supprimerTemplate(t)" matTooltip="Supprimer"><mat-icon>delete_outline</mat-icon></button>
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="3" class="muted">Aucun template configuré.</td></tr> }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </mat-tab>
+
+  <mat-tab label="Générer un document">
+    <div class="tab-content surface-card">
+      <div class="card-head"><h3>Générer</h3></div>
+      <form [formGroup]="formGeneration" (ngSubmit)="genererDocument()" class="inline-form">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="grow">
+          <mat-label>Étudiant</mat-label>
+          <mat-select formControlName="etudiantId" (selectionChange)="chargerDocuments($event.value)">
+            @for (e of etudiants(); track e.id) { <mat-option [value]="e.id">{{ e.prenom }} {{ e.nom }}</mat-option> }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Type</mat-label>
+          <mat-select formControlName="type">@for (t of typesDocument; track t) { <mat-option [value]="t">{{ t }}</mat-option> }</mat-select>
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="submit">Générer</button>
+      </form>
+
+      @if (etudiantSelectionne()) {
+        <div class="table-scroll">
+          <table class="styled-table">
+            <thead><tr><th>Numéro</th><th>Généré le</th><th></th></tr></thead>
+            <tbody>
+              @for (d of documentsGeneres(); track d.id) {
+                <tr>
+                  <td><code>{{ d.numero }}</code></td>
+                  <td class="muted">{{ d.dateGeneration | date: 'short' }}</td>
+                  <td>
+                    <button mat-button color="primary" (click)="voirPdf(d.id)">
+                      <mat-icon>picture_as_pdf</mat-icon>
+                      Voir / Imprimer
+                    </button>
+                    <button mat-icon-button (click)="supprimerDocumentGenere(d)" matTooltip="Supprimer">
+                      <mat-icon>delete_outline</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              } @empty { <tr><td colspan="3" class="muted">Aucun document généré pour cet étudiant.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </mat-tab>
+</mat-tab-group>

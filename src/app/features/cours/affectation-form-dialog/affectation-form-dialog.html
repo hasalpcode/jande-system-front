@@ -1,0 +1,46 @@
+<h2 mat-dialog-title>{{ enEdition ? 'Modifier une affectation' : 'Ajouter une affectation' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="soumettre()">
+  <mat-dialog-content class="contenu">
+    <div class="section-banner">Affectation des modules — {{ data.classe.libelle }}</div>
+    <div class="ligne">
+      <mat-form-field appearance="outline" class="grow">
+        <mat-label>Élément constitutif</mat-label>
+        <mat-select formControlName="elementConstitutifId">
+          @for (e of data.elementsConstitutifs; track e.id) {
+            <mat-option [value]="e.id">{{ e.intitule }} ({{ e.code }})</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="small">
+        <mat-label>Vol h</mat-label>
+        <input matInput type="number" formControlName="volumeHorairePrevu" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="small">
+        <mat-label>Crédits</mat-label>
+        <input matInput [value]="creditsChoisis() ?? '—'" disabled />
+      </mat-form-field>
+    </div>
+    <mat-form-field appearance="outline">
+      <mat-label>Professeur</mat-label>
+      <mat-select formControlName="professeurId">
+        @for (p of data.professeurs; track p.id) { <mat-option [value]="p.id">{{ p.prenom }} {{ p.nom }}</mat-option> }
+      </mat-select>
+    </mat-form-field>
+
+    @if (erreur()) {
+      <p class="erreur">{{ erreur() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="annuler()">Annuler</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="enCours()">
+      @if (enCours()) {
+        <mat-spinner diameter="20" />
+      } @else {
+        {{ enEdition ? 'Enregistrer' : 'Ajouter' }}
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

@@ -1,0 +1,75 @@
+<h2 mat-dialog-title>{{ enEdition ? 'Modifier la séance' : 'Ajouter une séance' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="soumettre()">
+  <mat-dialog-content class="contenu">
+    @if (!data.affectationFixee) {
+      <mat-form-field appearance="outline">
+        <mat-label>Affectation</mat-label>
+        <mat-select formControlName="affectationId">
+          @for (a of data.affectations; track a.id) {
+            <mat-option [value]="a.id">
+              {{ a.classe?.libelle || '—' }} — {{ a.elementConstitutif?.intitule || '—' }}
+              ({{ a.professeur ? (a.professeur.prenom + ' ' + a.professeur.nom) : '—' }})
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    } @else {
+      <p class="muted">
+        {{ data.affectationFixee.classe?.libelle || '—' }} — {{ data.affectationFixee.elementConstitutif?.intitule || '—' }}
+      </p>
+    }
+
+    <div class="ligne">
+      <mat-form-field appearance="outline">
+        <mat-label>Date</mat-label>
+        <input matInput type="date" formControlName="date" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Heure début</mat-label>
+        <input matInput type="time" formControlName="heureDebut" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Heure fin</mat-label>
+        <input matInput type="time" formControlName="heureFin" />
+      </mat-form-field>
+    </div>
+
+    <div class="ligne">
+      <mat-form-field appearance="outline">
+        <mat-label>Salle (optionnel)</mat-label>
+        <mat-select formControlName="salleId">
+          <mat-option value="">Aucune</mat-option>
+          @for (s of data.salles; track s.id) { <mat-option [value]="s.id">{{ s.libelle }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Type (optionnel)</mat-label>
+        <mat-select formControlName="type">
+          <mat-option value="">Non précisé</mat-option>
+          @for (t of typesSeance; track t) { <mat-option [value]="t">{{ t }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Contenu / chapitre enseigné (optionnel)</mat-label>
+      <textarea matInput formControlName="contenu" rows="4" placeholder="Chapitre 3 : les fonctions — définition, arguments, retour"></textarea>
+    </mat-form-field>
+
+    @if (erreur()) {
+      <p class="erreur">{{ erreur() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="annuler()">Annuler</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="enCours()">
+      @if (enCours()) {
+        <mat-spinner diameter="20" />
+      } @else {
+        {{ enEdition ? 'Enregistrer' : 'Ajouter' }}
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

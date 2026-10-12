@@ -1,0 +1,91 @@
+.contenu {
+  min-width: 720px;
+  max-height: 72vh;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px 14px;
+
+  .wide {
+    grid-column: span 3;
+  }
+  .small {
+    grid-column: span 1;
+  }
+}
+
+.section-banner {
+  margin: 18px 0 12px;
+  padding: 8px 16px;
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: center;
+  border-radius: 6px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.file-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: var(--mat-sys-on-surface-variant);
+
+  input[type='file'] {
+    font-size: 0.85rem;
+    color: var(--mat-sys-on-surface);
+  }
+}
+
+.apercu-photo-ligne {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.apercu-photo {
+  height: 40px;
+  width: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--mat-sys-surface-container-low);
+}
+
+.tuteurs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tuteur-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+
+  mat-form-field.grow {
+    flex: 1;
+  }
+}
+
+.erreur {
+  color: var(--mat-sys-error);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 760px) {
+  .contenu {
+    min-width: 0;
+  }
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+    .wide { grid-column: span 2; }
+  }
+}

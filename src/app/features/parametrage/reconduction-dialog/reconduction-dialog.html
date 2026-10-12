@@ -1,0 +1,54 @@
+<h2 mat-dialog-title>Reconduire vers une autre année</h2>
+
+@if (resultat(); as r) {
+  <mat-dialog-content class="contenu">
+    <p class="intro">Semestres, classes, unités d'enseignement et engagements (frais) ont été recopiés vers l'année cible.</p>
+    <ul class="liste-resultat">
+      <li><mat-icon>event</mat-icon> {{ r.semestresReconduits }} semestre(s)</li>
+      <li><mat-icon>groups</mat-icon> {{ r.classesReconduites }} classe(s)</li>
+      <li><mat-icon>menu_book</mat-icon> {{ r.unitesEnseignementReconduites }} unité(s) d'enseignement</li>
+      <li><mat-icon>list_alt</mat-icon> {{ r.elementsConstitutifsReconduits }} élément(s) constitutif(s)</li>
+      <li><mat-icon>payments</mat-icon> {{ r.engagementsReconduits }} engagement(s) (frais)</li>
+    </ul>
+    <p class="muted small-text">Ce qui existait déjà dans l'année cible a été laissé tel quel (pas de doublon).</p>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-flat-button color="primary" (click)="fermer()">Fermer</button>
+  </mat-dialog-actions>
+} @else {
+  <form [formGroup]="form" (ngSubmit)="soumettre()">
+    <mat-dialog-content class="contenu">
+      <p class="intro">
+        Recopie les semestres, classes, unités d'enseignement (avec leurs éléments constitutifs) et engagements (frais) de
+        l'année source vers l'année cible, avec les dates décalées d'autant d'années.
+      </p>
+      <mat-form-field appearance="outline">
+        <mat-label>Année source</mat-label>
+        <mat-select formControlName="anneeSourceId">
+          @for (a of data.annees; track a.id) { <mat-option [value]="a.id">{{ a.libelle }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Année cible</mat-label>
+        <mat-select formControlName="anneeCibleId">
+          @for (a of data.annees; track a.id) { <mat-option [value]="a.id">{{ a.libelle }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+
+      @if (erreur()) {
+        <p class="erreur">{{ erreur() }}</p>
+      }
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" (click)="fermer()">Annuler</button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="enCours()">
+        @if (enCours()) {
+          <mat-spinner diameter="20" />
+        } @else {
+          Reconduire
+        }
+      </button>
+    </mat-dialog-actions>
+  </form>
+}
