@@ -18,6 +18,10 @@
         @for (d of data.domaines; track d.id) { <mat-option [value]="d.id">{{ d.libelle }}</mat-option> }
       </mat-select>
     </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Grade</mat-label>
+      <input matInput formControlName="grade" placeholder="Licence, Master…" />
+    </mat-form-field>
 
     @if (erreur()) {
       <p class="erreur">{{ erreur() }}</p>

@@ -122,6 +122,11 @@ export interface Etudiant extends InfosPersonnelles {
 
 export interface ModifierEtudiantRequest extends InfosPersonnellesRequest {}
 
+export interface ImportEtudiantsResponse {
+  etudiantsImportes: Etudiant[];
+  lignesIgnorees: string[];
+}
+
 /** Choix proposes dans le formulaire d'inscription : toute inscription enregistree est
  * valide des sa creation, il n'y a plus d'etat intermediaire "en cours" a selectionner -
  * EN_COURS reste possible dans StatutInscription pour les inscriptions anciennes qui

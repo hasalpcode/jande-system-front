@@ -1,10 +1,12 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { catchError, forkJoin, of } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { Etudiant } from '../../core/models/inscriptions.models';
-import { Nationalite } from '../../core/models/parametrage.models';
+import { EtablissementInfo, Nationalite } from '../../core/models/parametrage.models';
 import { CoursService } from '../../core/services/cours.service';
+import { EtablissementInfoService } from '../../core/services/etablissement-info.service';
 import { InscriptionsService } from '../../core/services/inscriptions.service';
 import { NationaliteService } from '../../core/services/nationalite.service';
 import { PaiementsService } from '../../core/services/paiements.service';
@@ -104,7 +106,7 @@ function computeNationaliteStats(etudiants: Etudiant[], nationalites: Nationalit
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [MatIconModule],
+  imports: [MatIconModule, MatButtonModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -117,12 +119,14 @@ export class Dashboard implements OnInit {
   private readonly nationaliteService = inject(NationaliteService);
   private readonly coursService = inject(CoursService);
   private readonly academiqueService = inject(ParametrageAcademiqueService);
+  private readonly etablissementService = inject(EtablissementInfoService);
 
   readonly session = this.authService.currentSession;
 
   readonly statTiles = signal<StatTile[]>([]);
   readonly nationaliteStats = signal<NationaliteStat[]>([]);
   readonly nbEtudiantsPourDonut = signal<number | null>(null);
+  readonly etablissement = signal<EtablissementInfo | null>(null);
 
   /** Chaque appel est isolé par un catchError plutôt qu'un seul gros forkJoin qui échoue en
    * bloc : un profil restreint (comptable, enseignant...) n'a quasiment jamais toutes les
@@ -132,6 +136,11 @@ export class Dashboard implements OnInit {
    * dont la requête a réussi, pour ne jamais afficher un zéro trompeur (plutôt l'absence de
    * tuile) sur une donnée à laquelle l'utilisateur n'a en réalité pas accès. */
   ngOnInit(): void {
+    this.etablissementService.obtenir().subscribe({
+      next: (e) => this.etablissement.set(e),
+      error: () => this.etablissement.set(null),
+    });
+
     forkJoin({
       etudiants: this.inscriptionsService.listerEtudiants().pipe(catchError(() => of([]))),
       formulaires: this.inscriptionsService.listerFormulaires().pipe(catchError(() => of([]))),
@@ -190,5 +199,82 @@ export class Dashboard implements OnInit {
         this.nationaliteStats.set(computeNationaliteStats(etudiants, nationalites));
       }
     });
+  }
+
+  // ----- Rapport PDF du tableau de bord -----
+  // Même principe que la carte étudiante (Inscriptions) et les impressions de Statistiques :
+  // une page HTML autonome générée côté client dans une fenêtre dédiée, avec l'en-tête de
+  // l'établissement, plutôt qu'un PDF côté serveur pour un simple récapitulatif - "télécharger
+  // en PDF" se fait via l'impression du navigateur ("Enregistrer au format PDF").
+
+  private echapper(v: string | null | undefined): string {
+    return (v ?? '—').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  genererRapportPdf(): void {
+    const fenetre = window.open('', '_blank', 'width=900,height=700');
+    if (!fenetre) return;
+    const etab = this.etablissement();
+    const logo = etab?.logo ? `<img src="${this.echapper(etab.logo)}" alt="" class="logo" />` : '';
+    const dateImpression = new Date().toLocaleString('fr-FR');
+
+    const lignesIndicateurs = this.statTiles()
+      .map((t) => `<tr><td>${this.echapper(t.label)}</td><td class="numeric">${this.echapper(t.value)}</td></tr>`)
+      .join('');
+
+    const nationalites = this.nationaliteStats();
+    const sectionNationalites = nationalites.length
+      ? `<h2>Répartition des étudiants par nationalité</h2>
+         <table>
+           <thead><tr><th>Nationalité</th><th class="numeric">Étudiants</th><th class="numeric">Part</th></tr></thead>
+           <tbody>
+             ${nationalites
+               .map(
+                 (n) =>
+                   `<tr><td>${this.echapper(n.libelle)}</td><td class="numeric">${n.count}</td><td class="numeric">${n.percent}%</td></tr>`,
+               )
+               .join('')}
+           </tbody>
+         </table>`
+      : '';
+
+    fenetre.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8" /><title>Rapport de l'application</title>
+      <style>
+        @page { size: A4; margin: 14mm; }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Helvetica, Arial, sans-serif; color: #1d2129; }
+        .entete { display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #1a237e; padding-bottom: 10px; margin-bottom: 16px; }
+        .entete .logo { height: 14mm; max-width: 24mm; object-fit: contain; }
+        .entete .nom-etab { font-size: 13pt; font-weight: bold; color: #1a237e; text-transform: uppercase; }
+        .entete .adresse { font-size: 8pt; color: #565f6b; }
+        h1 { font-size: 14pt; margin: 0 0 2px; }
+        h2 { font-size: 11pt; margin: 26px 0 8px; color: #1a237e; }
+        .sous-titre { font-size: 9.5pt; color: #565f6b; margin: 0 0 16px; }
+        table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+        th, td { border: 1px solid #c8ccd2; padding: 4px 7px; text-align: left; }
+        th { background: #eef0f3; }
+        td.numeric, th.numeric { text-align: right; }
+        .date-impression { margin-top: 18px; font-size: 7.5pt; color: #94999f; text-align: right; }
+      </style>
+    </head><body>
+      <div class="entete">
+        ${logo}
+        <div>
+          <div class="nom-etab">${this.echapper(etab?.nom || 'Établissement')}</div>
+          <div class="adresse">${this.echapper(etab?.adresse)}</div>
+        </div>
+      </div>
+      <h1>Rapport de l'application</h1>
+      <p class="sous-titre">Vue d'ensemble générée le ${dateImpression}</p>
+      <h2>Indicateurs</h2>
+      <table>
+        <thead><tr><th>Indicateur</th><th class="numeric">Valeur</th></tr></thead>
+        <tbody>${lignesIndicateurs}</tbody>
+      </table>
+      ${sectionNationalites}
+      <p class="date-impression">Imprimé le ${dateImpression}</p>
+      <script>window.onload = () => window.print();<\/script>
+    </body></html>`);
+    fenetre.document.close();
   }
 }

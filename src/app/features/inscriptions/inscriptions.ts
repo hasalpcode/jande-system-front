@@ -5,6 +5,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatDialog } from '@angular/material/dialog';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -32,7 +33,16 @@ import { EtudiantFicheDialog, EtudiantFicheDialogData } from './etudiant-fiche-d
 @Component({
   selector: 'app-inscriptions',
   standalone: true,
-  imports: [FormsModule, MatTabsModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule, MatTooltipModule],
+  imports: [
+    FormsModule,
+    MatTabsModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatTooltipModule,
+    MatProgressSpinnerModule,
+  ],
   templateUrl: './inscriptions.html',
   styleUrl: './inscriptions.scss',
 })
@@ -57,6 +67,7 @@ export class InscriptionsPage implements OnInit {
   readonly niveaux = signal<Niveau[]>([]);
   readonly etablissement = signal<EtablissementInfo | null>(null);
   readonly chargement = signal(true);
+  readonly importEnCours = signal(false);
 
   readonly rechercheMatricule = signal('');
   readonly rechercheEtudiant = signal('');
@@ -239,6 +250,48 @@ export class InscriptionsPage implements OnInit {
     });
   }
 
+  telechargerModeleImportEtudiants(): void {
+    this.inscriptionsService.telechargerModeleImportEtudiants().subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const lien = document.createElement('a');
+        lien.href = url;
+        lien.download = 'modele-import-etudiants.xlsx';
+        lien.click();
+        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+      },
+      error: () => this.snackBar.open('Impossible de générer le modèle', 'OK', { duration: 3000 }),
+    });
+  }
+
+  /** Après lecture, réinitialise la valeur du champ fichier - sinon réimporter le même
+   * fichier (après correction) ne redéclenche pas l'événement "change". */
+  importerEtudiants(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const fichier = input.files?.[0];
+    input.value = '';
+    if (!fichier) return;
+    this.importEnCours.set(true);
+    this.inscriptionsService.importerEtudiants(fichier).subscribe({
+      next: (resultat) => {
+        this.importEnCours.set(false);
+        this.charger();
+        const nbImportes = resultat.etudiantsImportes.length;
+        this.snackBar.open(
+          resultat.lignesIgnorees.length
+            ? `${nbImportes} étudiant(s) importé(s) - lignes ignorées : ${resultat.lignesIgnorees.join(' ; ')}`
+            : `${nbImportes} étudiant(s) importé(s)`,
+          'OK',
+          { duration: resultat.lignesIgnorees.length ? 8000 : 3000 },
+        );
+      },
+      error: () => {
+        this.importEnCours.set(false);
+        this.snackBar.open("L'import a échoué, vérifiez le fichier.", 'OK', { duration: 4000 });
+      },
+    });
+  }
+
   /** Classe (+ niveau) de l'etudiant d'une ligne "Inscriptions" - la classe embarquee sur
    * Inscription n'a pas le niveau, on la recroise avec la liste complete des classes. */
   classeDeInscription(inscription: Inscription): Classe | null {
@@ -247,7 +300,7 @@ export class InscriptionsPage implements OnInit {
 
   /** Carte étudiante - générée côté client dans une fenêtre dédiée, comme l'impression de la
    * fiche étudiant : pas de PDF côté serveur pour un document aussi simple, et qrcodejs (CDN)
-   * fait le rendu du QR code. Nom/prénom/année scolaire/n° carte restent visibles en texte ;
+   * fait le rendu du QR code. Nom/prénom/Année académique/n° carte restent visibles en texte ;
    * matricule, classe, niveau et n° carte sont en plus embarqués dans le QR. Le n° carte
    * n'existe que pour une inscription (CarteEtudiant est lié 1-1 à Inscription) : l'onglet
    * "Admissions" (étudiant pas encore inscrit) n'en fournit pas d'id, la carte s'imprime
@@ -319,7 +372,7 @@ export class InscriptionsPage implements OnInit {
           <div class="identite">
             <div class="nom">${echapper(etudiant.nom)}</div>
             <div class="prenom">${echapper(etudiant.prenom)}</div>
-            <div class="ligne"><strong>Année scolaire :</strong> ${echapper(classe?.anneeAcademiqueLibelle ?? '—')}</div>
+            <div class="ligne"><strong>Année académique :</strong> ${echapper(classe?.anneeAcademiqueLibelle ?? '—')}</div>
             <div class="ligne"><strong>N° carte :</strong> ${echapper(numeroCarte ?? '—')}</div>
           </div>
         </div>

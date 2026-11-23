@@ -111,6 +111,10 @@ export class ParametragePage implements OnInit {
     return this.annees().find((a) => a.id === anneeAcademiqueId)?.libelle ?? '—';
   }
 
+  domaineLibelle(domaineId: string | null): string {
+    return this.domaines().find((d) => d.id === domaineId)?.libelle ?? '—';
+  }
+
   ngOnInit(): void {
     this.charger();
   }

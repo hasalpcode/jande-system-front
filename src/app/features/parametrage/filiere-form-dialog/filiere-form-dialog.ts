@@ -48,7 +48,6 @@ export class FiliereFormDialog {
     optionId: [this.data.filiere?.optionId ?? '', Validators.required],
     // Fixe a la creation - non modifiable ensuite (voir champ masque en edition dans le template).
     type: this.fb.nonNullable.control<TypeFiliere>('SPECIALITE', Validators.required),
-    grade: [this.data.filiere?.grade ?? ''],
   });
 
   annuler(): void {
@@ -59,8 +58,7 @@ export class FiliereFormDialog {
     if (this.form.invalid) return this.form.markAllAsTouched();
     this.enCours.set(true);
     this.erreur.set(null);
-    const v = this.form.getRawValue();
-    const requete = { ...v, grade: v.grade || undefined };
+    const requete = this.form.getRawValue();
     const id = this.data.filiere?.id;
     const appel = id ? this.academique.modifierFiliere(id, requete) : this.academique.creerFiliere(requete);
     appel.subscribe({

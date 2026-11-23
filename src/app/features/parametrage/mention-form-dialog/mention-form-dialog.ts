@@ -46,6 +46,7 @@ export class MentionFormDialog {
     code: [this.data.mention?.code ?? '', Validators.required],
     libelle: [this.data.mention?.libelle ?? '', Validators.required],
     domaineId: [this.data.mention?.domaineId ?? '', Validators.required],
+    grade: [this.data.mention?.grade ?? ''],
   });
 
   annuler(): void {
@@ -56,7 +57,8 @@ export class MentionFormDialog {
     if (this.form.invalid) return this.form.markAllAsTouched();
     this.enCours.set(true);
     this.erreur.set(null);
-    const requete = this.form.getRawValue();
+    const v = this.form.getRawValue();
+    const requete = { ...v, grade: v.grade || undefined };
     const id = this.data.mention?.id;
     const appel = id ? this.academique.modifierMention(id, requete) : this.academique.creerMention(requete);
     appel.subscribe({

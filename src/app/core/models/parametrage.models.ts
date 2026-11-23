@@ -42,11 +42,13 @@ export interface Mention {
   code: string;
   libelle: string;
   domaineId: string;
+  grade: string | null;
 }
 export interface MentionRequest {
   code: string;
   libelle: string;
   domaineId: string;
+  grade?: string;
 }
 
 export interface Option {
@@ -68,14 +70,12 @@ export interface FiliereAcademique {
   code: string;
   libelle: string;
   optionId: string;
-  grade: string | null;
 }
 export interface FiliereRequest {
   code: string;
   libelle: string;
   optionId: string;
   type: TypeFiliere;
-  grade?: string;
 }
 
 export interface Niveau {

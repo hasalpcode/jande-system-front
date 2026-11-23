@@ -12,6 +12,7 @@ import {
   EcheancePrevueRequest,
   Etudiant,
   FormulaireAdmission,
+  ImportEtudiantsResponse,
   Inscription,
   InscriptionRequest,
   ModifierEtudiantRequest,
@@ -45,6 +46,14 @@ export class InscriptionsService {
   }
   exporterEtudiants(): Observable<Blob> {
     return this.http.get(`${this.baseUrl}/etudiants/export`, { responseType: 'blob' });
+  }
+  telechargerModeleImportEtudiants(): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/etudiants/import/modele`, { responseType: 'blob' });
+  }
+  importerEtudiants(fichier: File): Observable<ImportEtudiantsResponse> {
+    const donnees = new FormData();
+    donnees.set('fichier', fichier);
+    return this.http.post<ImportEtudiantsResponse>(`${this.baseUrl}/etudiants/import`, donnees);
   }
 
   listerInscriptions(): Observable<Inscription[]> {

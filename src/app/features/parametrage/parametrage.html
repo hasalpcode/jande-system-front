@@ -136,19 +136,21 @@
         </div>
         <div class="table-scroll">
           <table class="styled-table">
-            <thead><tr><th>Code</th><th>Libellé</th><th></th></tr></thead>
+            <thead><tr><th>Code</th><th>Libellé</th><th>Domaine</th><th>Grade</th><th></th></tr></thead>
             <tbody>
               @for (m of paginationMentions.page(); track m.id) {
                 <tr>
                   <td><code>{{ m.code }}</code></td>
                   <td>{{ m.libelle }}</td>
+                  <td class="muted">{{ domaineLibelle(m.domaineId) }}</td>
+                  <td class="muted">{{ m.grade || '—' }}</td>
                   <td>
                     <button mat-icon-button (click)="ouvrirEditionMention(m)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
                     <button mat-icon-button (click)="supprimerMention(m.id)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
                   </td>
                 </tr>
               }
-              @empty { <tr><td colspan="3" class="muted">Aucune mention.</td></tr> }
+              @empty { <tr><td colspan="5" class="muted">Aucune mention.</td></tr> }
             </tbody>
           </table>
         </div>
@@ -195,25 +197,24 @@
 
       <div class="surface-card">
         <div class="card-head">
-          <h3>Filières (Spécialité / Filière)</h3>
+          <h3>Spécialité</h3>
           <button mat-icon-button (click)="ouvrirAjoutFiliere()" matTooltip="Ajouter"><mat-icon>add</mat-icon></button>
         </div>
         <div class="table-scroll">
           <table class="styled-table">
-            <thead><tr><th>Code</th><th>Libellé</th><th>Grade</th><th></th></tr></thead>
+            <thead><tr><th>Code</th><th>Libellé</th><th></th></tr></thead>
             <tbody>
               @for (f of paginationFilieres.page(); track f.id) {
                 <tr>
                   <td><code>{{ f.code }}</code></td>
                   <td>{{ f.libelle }}</td>
-                  <td class="muted">{{ f.grade || '—' }}</td>
                   <td>
                     <button mat-icon-button (click)="ouvrirEditionFiliere(f)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
                     <button mat-icon-button (click)="supprimerFiliere(f.id)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
                   </td>
                 </tr>
               }
-              @empty { <tr><td colspan="4" class="muted">Aucune filière.</td></tr> }
+              @empty { <tr><td colspan="3" class="muted">Aucune filière.</td></tr> }
             </tbody>
           </table>
         </div>
@@ -266,12 +267,11 @@
         </div>
         <div class="table-scroll">
           <table class="styled-table">
-            <thead><tr><th>Libellé</th><th>Ordre</th><th></th></tr></thead>
+            <thead><tr><th>Libellé</th><th></th></tr></thead>
             <tbody>
               @for (n of paginationNiveaux.page(); track n.id) {
                 <tr>
                   <td>{{ n.libelle }}</td>
-                  <td class="numeric">{{ n.ordre }}</td>
                   <td>
                     <button mat-icon-button (click)="ouvrirEditionNiveau(n)" matTooltip="Modifier"><mat-icon>edit</mat-icon></button>
                     <button mat-icon-button (click)="supprimerNiveau(n.id)" matTooltip="Supprimer"><mat-icon>delete</mat-icon></button>
