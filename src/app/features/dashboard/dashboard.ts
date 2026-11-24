@@ -265,7 +265,7 @@ export class Dashboard implements OnInit {
         </div>
       </div>
       <h1>Rapport de l'application</h1>
-      <p class="sous-titre">Vue d'ensemble générée le ${dateImpression}</p>
+      <p class="sous-titre">Tableau de bord générée le ${dateImpression}</p>
       <h2>Indicateurs</h2>
       <table>
         <thead><tr><th>Indicateur</th><th class="numeric">Valeur</th></tr></thead>

@@ -2,6 +2,14 @@
   min-height: 100vh;
   display: flex;
   background: var(--mat-sys-surface-container-low);
+
+  // Sans ce repli, .vitrine (flex:none, donc flex-shrink:0) et .volet-connexion
+  // restent cote a cote en dessous de 860px : la carte de connexion est poussee
+  // hors ecran plutot que de passer sous la vitrine.
+  @media (max-width: 860px) {
+    flex-direction: column;
+    min-height: 0;
+  }
 }
 
 // ----- Vitrine (branding + slogan) -----
