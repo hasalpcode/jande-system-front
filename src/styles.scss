@@ -124,6 +124,7 @@ h1, h2, h3 {
 
 .page-header-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
@@ -271,6 +272,7 @@ h1, h2, h3 {
 
 .dialog-form .row {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
 
   mat-form-field {
@@ -352,12 +354,22 @@ h1, h2, h3 {
   grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   gap: 20px;
   align-items: start;
+
+  // Une carte peut contenir un tableau large (.table-scroll) : sans ce reset, le
+  // minimum automatique d'un item de grille reprend le min-content de son
+  // contenu (cellules en white-space:nowrap) et elargit toute la piste au-dela
+  // du viewport - meme quand il ne reste plus qu'une seule colonne sur mobile.
+  > * {
+    min-width: 0;
+  }
 }
 
 .card-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
   padding: 16px 18px;
   border-bottom: 1px solid var(--mat-sys-outline-variant);
 
@@ -413,12 +425,15 @@ h1, h2, h3 {
   .sidebar {
     display: none !important;
   }
-  // .shell est une grille a 2 colonnes (barre laterale + contenu) : masquer la
-  // barre laterale sans repasser sur 1 colonne laisse .main se replacer dans la
-  // 1ere piste (264px) plutot que de s'etendre - tout le contenu imprime alors
-  // ecrase sur une bande etroite.
-  .shell {
-    display: block !important;
+  // mat-sidenav-container/-content sont en overflow:hidden/auto par defaut (pour
+  // gerer leur propre defilement a l'ecran) - sans ce reset, un contenu imprimable
+  // plus long qu'un ecran serait tronque a la zone visible plutot que de s'etaler
+  // sur plusieurs pages papier.
+  .mat-drawer-container,
+  .mat-drawer-content {
+    overflow: visible !important;
+    height: auto !important;
+    position: static !important;
   }
   .main {
     padding: 0 !important;

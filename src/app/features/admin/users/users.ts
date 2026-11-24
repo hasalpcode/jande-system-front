@@ -43,7 +43,7 @@ export class Users implements OnInit {
   }
 
   ouvrirCreation(): void {
-    const ref = this.dialog.open(CreateUserDialog, { width: '520px' });
+    const ref = this.dialog.open(CreateUserDialog, { width: '520px', maxWidth: '95vw' });
     ref.afterClosed().subscribe((utilisateur: Utilisateur | undefined) => {
       if (utilisateur) {
         this.snackBar.open(`${utilisateur.prenom} ${utilisateur.nom} créé`, 'OK', { duration: 4000 });
@@ -55,6 +55,7 @@ export class Users implements OnInit {
   ouvrirEdition(utilisateur: Utilisateur): void {
     const ref = this.dialog.open<CreateUserDialog, CreateUserDialogData, Utilisateur>(CreateUserDialog, {
       width: '520px',
+      maxWidth: '95vw',
       data: { utilisateur },
     });
     ref.afterClosed().subscribe((maj) => {

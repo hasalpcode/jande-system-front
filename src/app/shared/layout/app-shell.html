@@ -1,5 +1,5 @@
-<div class="shell">
-  <aside class="sidebar">
+<mat-sidenav-container class="shell">
+  <mat-sidenav class="sidebar" [mode]="mode()" [(opened)]="menuOuvert">
     <div class="brand">
       @if (logoEtablissement(); as logo) {
         <img [src]="logo" alt="" class="brand-logo" />
@@ -23,6 +23,7 @@
               class="nav-link"
               [routerLink]="item.route"
               routerLinkActive="active"
+              (click)="fermerSiMobile()"
             >
               <mat-icon [class]="item.tint">{{ item.icon }}</mat-icon>
               <span>{{ item.label }}</span>
@@ -38,9 +39,18 @@
         Se déconnecter
       </button>
     </div>
-  </aside>
+  </mat-sidenav>
 
-  <main class="main">
-    <router-outlet />
-  </main>
-</div>
+  <mat-sidenav-content>
+    <mat-toolbar class="mobile-topbar no-print">
+      <button mat-icon-button (click)="menuOuvert.set(!menuOuvert())" aria-label="Ouvrir le menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="mobile-topbar-title">{{ titrePlateforme() }}</span>
+    </mat-toolbar>
+
+    <main class="main">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

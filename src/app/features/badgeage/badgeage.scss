@@ -37,13 +37,25 @@
 .resultat-identite {
   display: flex;
   align-items: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px 12px;
   margin-bottom: 12px;
+
+  // Bloc nom/matricule (div sans classe entre l'avatar et .resultat-heure) : doit
+  // pouvoir retrecir (flex-basis auto + min-width:0) pour que l'ellipsis fonctionne
+  // sur un nom long plutot que de pousser .resultat-heure hors de l'ecran.
+  > div {
+    flex: 1 1 160px;
+    min-width: 0;
+  }
 }
 
 .resultat-nom {
   font-size: 1.05rem;
   font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .resultat-heure {

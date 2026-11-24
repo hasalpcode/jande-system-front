@@ -408,20 +408,22 @@
       </div>
       <div class="entete-identite">
         <div class="titre-bulletin">Bulletin de notes<br />{{ detail.bulletin.semestreLibelle }}</div>
-        <table class="table-identite">
-          <tr><th>Année académique</th><td>{{ detail.bulletin.anneeAcademiqueLibelle }}</td></tr>
-          <tr><th>Matricule</th><td>{{ detail.bulletin.matricule }}</td></tr>
-          <tr><th>Nom et prénom</th><td>{{ detail.bulletin.etudiantNomComplet }}</td></tr>
-          <tr><th>Sexe</th><td>{{ detail.bulletin.etudiantSexe || '—' }}</td></tr>
-          <tr>
-            <th>Lieu &amp; Date naissance</th>
-            <td>
-              {{ detail.bulletin.etudiantLieuNaissance || '—' }}@if (detail.bulletin.etudiantDateNaissance) {<ng-container
-                  >, le {{ detail.bulletin.etudiantDateNaissance | date: 'dd/MM/yyyy' }}</ng-container
-                >}
-            </td>
-          </tr>
-        </table>
+        <div class="table-scroll">
+          <table class="table-identite">
+            <tr><th>Année académique</th><td>{{ detail.bulletin.anneeAcademiqueLibelle }}</td></tr>
+            <tr><th>Matricule</th><td>{{ detail.bulletin.matricule }}</td></tr>
+            <tr><th>Nom et prénom</th><td>{{ detail.bulletin.etudiantNomComplet }}</td></tr>
+            <tr><th>Sexe</th><td>{{ detail.bulletin.etudiantSexe || '—' }}</td></tr>
+            <tr>
+              <th>Lieu &amp; Date naissance</th>
+              <td>
+                {{ detail.bulletin.etudiantLieuNaissance || '—' }}@if (detail.bulletin.etudiantDateNaissance) {<ng-container
+                    >, le {{ detail.bulletin.etudiantDateNaissance | date: 'dd/MM/yyyy' }}</ng-container
+                  >}
+              </td>
+            </tr>
+          </table>
+        </div>
       </div>
     </div>
 

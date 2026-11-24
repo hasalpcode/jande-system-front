@@ -6,9 +6,16 @@
   grid-template-columns: repeat(2, minmax(360px, 1fr));
 }
 
+@media (max-width: 780px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .card-head-actions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 

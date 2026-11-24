@@ -1,9 +1,12 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { map } from 'rxjs/operators';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDividerModule } from '@angular/material/divider';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { AuthService } from '../../core/services/auth.service';
 import { EtablissementInfoService } from '../../core/services/etablissement-info.service';
 import { NavGroup } from './nav-item.model';
@@ -93,7 +96,15 @@ const NAV_ADMIN: NavGroup[] = [
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, MatToolbarModule, MatIconModule, MatButtonModule, MatDividerModule],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    MatToolbarModule,
+    MatIconModule,
+    MatButtonModule,
+    MatSidenavModule,
+  ],
   templateUrl: './app-shell.html',
   styleUrl: './app-shell.scss',
 })
@@ -101,6 +112,7 @@ export class AppShell {
   private readonly authService = inject(AuthService);
   private readonly etablissementService = inject(EtablissementInfoService);
   private readonly router = inject(Router);
+  private readonly breakpointObserver = inject(BreakpointObserver);
 
   readonly session = this.authService.currentSession;
   readonly navGroups = computed<NavGroup[]>(() =>
@@ -110,12 +122,40 @@ export class AppShell {
 
   readonly logoEtablissement = signal<string | null>(null);
 
+  /** Meme seuil que l'ancien @media (max-width: 900px) - au-dela, la sidebar reste
+   * fixe (mode "side") ; en dessous, elle devient un tiroir (mode "over") ferme par
+   * defaut, ouvert via le bouton hamburger de la barre mobile. */
+  readonly estMobile = toSignal(
+    this.breakpointObserver.observe('(max-width: 900px)').pipe(map((r) => r.matches)),
+    { requireSync: true },
+  );
+  readonly mode = computed(() => (this.estMobile() ? 'over' : 'side'));
+
+  /** Lie en two-way [(opened)] plutot qu'un binding derive de estMobile() : sinon le
+   * binding reactif et l'ouverture/fermeture manuelle (bouton hamburger, clic sur le
+   * fond, clic sur un lien) se disputeraient l'etat. L'effet ne reinitialise l'etat
+   * que lorsque estMobile() change reellement (franchissement du seuil), pas a
+   * chaque cycle de detection de changement. */
+  readonly menuOuvert = signal(!this.estMobile());
+
   constructor() {
+    effect(() => {
+      this.menuOuvert.set(!this.estMobile());
+    });
+
     if (!this.authService.estSuperAdmin()) {
       this.etablissementService.obtenir().subscribe({
         next: (e) => this.logoEtablissement.set(e.logo),
         error: () => this.logoEtablissement.set(null),
       });
+    }
+  }
+
+  /** Un lien de nav ferme le tiroir en mobile ; sur desktop (mode "side"), c'est un
+   * no-op - le menu reste affiche en permanence. */
+  fermerSiMobile(): void {
+    if (this.estMobile()) {
+      this.menuOuvert.set(false);
     }
   }
 

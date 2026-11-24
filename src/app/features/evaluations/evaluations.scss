@@ -3,6 +3,7 @@
 .card-head-actions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -297,6 +298,10 @@
   gap: 10px 24px;
   flex: 1 1 auto;
   min-width: 0;
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
 
   .etiquette {
     display: block;

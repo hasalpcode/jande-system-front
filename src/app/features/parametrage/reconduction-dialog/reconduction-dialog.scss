@@ -40,3 +40,9 @@
   font-size: 0.9rem;
   margin: 0;
 }
+
+@media (max-width: 760px) {
+  .contenu {
+    min-width: 0;
+  }
+}

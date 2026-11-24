@@ -50,7 +50,7 @@ export class Tenants implements OnInit {
   }
 
   ouvrirCreation(): void {
-    const ref = this.dialog.open(CreateTenantDialog, { width: '460px' });
+    const ref = this.dialog.open(CreateTenantDialog, { width: '460px', maxWidth: '95vw' });
     ref.afterClosed().subscribe((etablissement: Etablissement | undefined) => {
       if (etablissement) {
         this.snackBar.open(`Établissement ${etablissement.code} créé`, 'OK', { duration: 4000 });

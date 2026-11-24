@@ -169,7 +169,11 @@ export class ParametragePage implements OnInit {
     this.ouvrirFormulaireAnnee(annee);
   }
   private ouvrirFormulaireAnnee(annee: AnneeAcademique | undefined): void {
-    const ref = this.dialog.open<AnneeFormDialog, AnneeFormDialogData, AnneeAcademique>(AnneeFormDialog, { data: { annee } });
+    const ref = this.dialog.open<AnneeFormDialog, AnneeFormDialogData, AnneeAcademique>(AnneeFormDialog, {
+      width: '480px',
+      maxWidth: '95vw',
+      data: { annee },
+    });
     ref.afterClosed().subscribe((resultat) => {
       if (!resultat) return;
       this.snackBar.open(annee ? 'Année modifiée' : 'Année ajoutée', 'OK', { duration: 3000 });
@@ -209,6 +213,8 @@ export class ParametragePage implements OnInit {
 
   ouvrirReconduction(): void {
     const ref = this.dialog.open<ReconductionDialog, ReconductionDialogData, boolean>(ReconductionDialog, {
+      width: '480px',
+      maxWidth: '95vw',
       data: { annees: this.annees() },
     });
     ref.afterClosed().subscribe((succes) => {
@@ -227,6 +233,8 @@ export class ParametragePage implements OnInit {
   }
   private ouvrirFormulaireSemestre(semestre: Semestre | undefined): void {
     const ref = this.dialog.open<SemestreFormDialog, SemestreFormDialogData, Semestre>(SemestreFormDialog, {
+      width: '480px',
+      maxWidth: '95vw',
       data: { annees: this.annees(), semestres: this.semestres(), semestre },
     });
     ref.afterClosed().subscribe((resultat) => {
@@ -256,7 +264,11 @@ export class ParametragePage implements OnInit {
     this.ouvrirFormulaireDomaine(domaine);
   }
   private ouvrirFormulaireDomaine(domaine: Domaine | undefined): void {
-    const ref = this.dialog.open<DomaineFormDialog, DomaineFormDialogData, Domaine>(DomaineFormDialog, { data: { domaine } });
+    const ref = this.dialog.open<DomaineFormDialog, DomaineFormDialogData, Domaine>(DomaineFormDialog, {
+      width: '480px',
+      maxWidth: '95vw',
+      data: { domaine },
+    });
     ref.afterClosed().subscribe((resultat) => {
       if (!resultat) return;
       this.snackBar.open(domaine ? 'Domaine modifié' : 'Domaine ajouté', 'OK', { duration: 3000 });
@@ -285,6 +297,8 @@ export class ParametragePage implements OnInit {
   }
   private ouvrirFormulaireMention(mention: Mention | undefined): void {
     const ref = this.dialog.open<MentionFormDialog, MentionFormDialogData, Mention>(MentionFormDialog, {
+      width: '480px',
+      maxWidth: '95vw',
       data: { domaines: this.domaines(), mention },
     });
     ref.afterClosed().subscribe((resultat) => {
@@ -315,6 +329,8 @@ export class ParametragePage implements OnInit {
   }
   private ouvrirFormulaireOption(option: Option | undefined): void {
     const ref = this.dialog.open<OptionFormDialog, OptionFormDialogData, Option>(OptionFormDialog, {
+      width: '480px',
+      maxWidth: '95vw',
       data: { mentions: this.mentions(), option },
     });
     ref.afterClosed().subscribe((resultat) => {
@@ -345,6 +361,8 @@ export class ParametragePage implements OnInit {
   }
   private ouvrirFormulaireFiliere(filiere: FiliereAcademique | undefined): void {
     const ref = this.dialog.open<FiliereFormDialog, FiliereFormDialogData, FiliereAcademique>(FiliereFormDialog, {
+      width: '480px',
+      maxWidth: '95vw',
       data: { options: this.options(), filiere },
     });
     ref.afterClosed().subscribe((resultat) => {
@@ -374,7 +392,11 @@ export class ParametragePage implements OnInit {
     this.ouvrirFormulaireSalle(salle);
   }
   private ouvrirFormulaireSalle(salle: Salle | undefined): void {
-    const ref = this.dialog.open<SalleFormDialog, SalleFormDialogData, Salle>(SalleFormDialog, { data: { salle } });
+    const ref = this.dialog.open<SalleFormDialog, SalleFormDialogData, Salle>(SalleFormDialog, {
+      width: '480px',
+      maxWidth: '95vw',
+      data: { salle },
+    });
     ref.afterClosed().subscribe((resultat) => {
       if (!resultat) return;
       this.snackBar.open(salle ? 'Salle modifiée' : 'Salle ajoutée', 'OK', { duration: 3000 });
@@ -403,6 +425,8 @@ export class ParametragePage implements OnInit {
   }
   private ouvrirFormulaireNiveau(niveau: Niveau | undefined): void {
     const ref = this.dialog.open<NiveauFormDialog, NiveauFormDialogData, Niveau>(NiveauFormDialog, {
+      width: '480px',
+      maxWidth: '95vw',
       data: { niveaux: this.niveaux(), niveau },
     });
     ref.afterClosed().subscribe((resultat) => {
@@ -434,6 +458,8 @@ export class ParametragePage implements OnInit {
   }
   private ouvrirFormulaireNationalite(nationalite: Nationalite | undefined): void {
     const ref = this.dialog.open<NationaliteFormDialog, NationaliteFormDialogData, Nationalite>(NationaliteFormDialog, {
+      width: '480px',
+      maxWidth: '95vw',
       data: { nationalite },
     });
     ref.afterClosed().subscribe((resultat) => {
@@ -497,6 +523,8 @@ export class ParametragePage implements OnInit {
   }
   private ouvrirFormulaireMode(mode: ModePaiement | undefined): void {
     const ref = this.dialog.open<ModePaiementFormDialog, ModePaiementFormDialogData, ModePaiement>(ModePaiementFormDialog, {
+      width: '480px',
+      maxWidth: '95vw',
       data: { mode },
     });
     ref.afterClosed().subscribe((resultat) => {
@@ -527,6 +555,8 @@ export class ParametragePage implements OnInit {
   }
   private ouvrirFormulairePartenaire(partenaire: Partenaire | undefined): void {
     const ref = this.dialog.open<PartenaireFormDialog, PartenaireFormDialogData, Partenaire>(PartenaireFormDialog, {
+      width: '480px',
+      maxWidth: '95vw',
       data: { partenaire },
     });
     ref.afterClosed().subscribe((resultat) => {

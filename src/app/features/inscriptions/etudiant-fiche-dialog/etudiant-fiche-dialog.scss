@@ -125,3 +125,33 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 14px 18px;
 }
+
+// Repli sur-mesure (pas le gabarit .contenu/.ligne des autres dialogs - ici ce
+// sont des grilles a colonnes fixes) : d'abord moins de colonnes, puis 1 seule
+// sur telephone. .photo-profil cible explicitement la colonne 5 / 3 lignes de
+// .grille-etat-civil - en dessous de 2 colonnes, elle doit repasser en bloc
+// pleine largeur plutot que de viser une colonne qui n'existe plus.
+@media (max-width: 700px) {
+  .grille-etat-civil {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .photo-profil {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    height: 140px;
+  }
+  .grille-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .grille-etat-civil,
+  .grille-3,
+  .grille-2 {
+    grid-template-columns: 1fr;
+  }
+  .champ-large {
+    grid-column: 1 / -1;
+  }
+}

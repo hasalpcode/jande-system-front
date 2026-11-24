@@ -65,3 +65,12 @@
     background: var(--mat-sys-surface-container-low);
   }
 }
+
+@media (max-width: 760px) {
+  .contenu {
+    min-width: 0;
+  }
+  .ligne {
+    flex-direction: column;
+  }
+}
