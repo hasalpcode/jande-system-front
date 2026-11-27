@@ -42,11 +42,23 @@ services:
       - backend
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - certbot_certs:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
     networks:
       - internal
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - certbot_certs:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
 
 networks:
   internal:
 
 volumes:
   pgdata:
+  certbot_certs:
+  certbot_www:
